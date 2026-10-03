@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-03T16:09:08.820407+00:00",
+  "updated_at": "2026-10-03T16:35:03.353421+00:00",
   "project": "Last Known",
-  "phase": "preproduction",
+  "phase": "foundation",
   "current_chapter": 1,
   "tasks": [
     {
@@ -31,29 +31,35 @@
     {
       "id": "chapter-1-brief",
       "title": "Define Chapter 1 clue chain and completion criteria",
-      "status": "pending",
+      "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:00:04.388898+00:00",
-      "evidence": [],
-      "next_action": "Draft brief under docs/source/."
+      "updated_at": "2026-10-03T16:14:55.121081+00:00",
+      "evidence": [
+        "Proposed chapter brief separates foundation from later corroboration, apartment, utility room, ending and checkpoints."
+      ],
+      "next_action": "User reviews narrative proposals; implement only foundation slice."
     },
     {
       "id": "linux-export",
       "title": "Run minimal exported Linux build",
-      "status": "pending",
+      "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:00:04.388898+00:00",
-      "evidence": [],
-      "next_action": "Create game/project.godot and verify matching export templates; run exported Linux build."
+      "updated_at": "2026-10-03T16:32:34.697096+00:00",
+      "evidence": [
+        "Official 4.7.2.stable Linux templates installed and version checked; minimal export proved before blockout.",
+        "Final Linux Foundation release export passed; executable headless and graphical startup exited 0 without observed errors.",
+        "builds/linux/last_known.x86_64: 73,534,600 bytes; embedded PCK; Compatibility renderer."
+      ],
+      "next_action": "Human playtest of exported foundation using docs/setup.md checklist."
     },
     {
       "id": "chapter-1-playable",
       "title": "Complete Chapter 1 in placeholder geometry",
       "status": "pending",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:00:04.388898+00:00",
+      "updated_at": "2026-10-03T16:32:34.697096+00:00",
       "evidence": [],
-      "next_action": "Follow the chapter brief after toolchain verification."
+      "next_action": "Complete Chapter 1 investigation (apartment, utility room, independent evidence and onward lead) and checkpoint saving after foundation review."
     },
     {
       "id": "chapter-1-polish",
@@ -89,11 +95,37 @@
       "title": "Prepare Git ignore rules and agent repository workflow",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:09:08.820407+00:00",
+      "updated_at": "2026-10-03T16:35:03.353421+00:00",
       "evidence": [
         "git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed."
       ],
-      "next_action": "User creates and pushes initial commit; then agents use task branches and PRs."
+      "next_action": "Review draft PR #1; merge only with user authorization. Initial push verified and task branch pushed using command-specific HTTPS push URL."
+    },
+    {
+      "id": "startup-prompt",
+      "title": "Prepare first playable foundation handoff",
+      "status": "completed",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:11:53.805121+00:00",
+      "evidence": [
+        "Created docs/prompts/01-start-project.md with bounded implementation, verification, repository handling, and completion criteria."
+      ],
+      "next_action": "User gives startup prompt to GPT-6.1 Sol."
+    },
+    {
+      "id": "chapter-1-foundation",
+      "title": "First playable street/shop/power/clue foundation",
+      "status": "completed",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:35:03.353421+00:00",
+      "evidence": [
+        "Street/shop blockout, first-person collision/mouse look, power source, one saved clue, evidence HUD, skippable arrival, computer exit, pause/resume and sensitivity implemented.",
+        "Real-scene headless and graphical behavior checks reported FOUNDATION CHECK: 0 failures; screenshots inspected for readable route and UI.",
+        "Checks exercise no-power rejection, repeat interactions, power-first order, held movement in menus, arrival completion/skips, mouse capture/look, wall occlusion and exterior collision boundaries.",
+        "docs/setup.md records commands, build size, graphical driver, test limits and pending human review; no complete chapter or performance claim.",
+        "Implementation commit f6f1bb6 pushed on codex/first-playable-foundation; draft PR https://github.com/Haze-dev1/Last-known-The-game/pull/1 opened; no merge or game publication."
+      ],
+      "next_action": "Review proposed story details and human-playtest foundation; next bounded task is Chapter 1 investigation and checkpoint saving."
     }
   ],
   "blockers": [],
@@ -109,7 +141,31 @@
       "name": "structure-and-engine-verification",
       "result": "passed",
       "details": "Engine version observed; project document links checked. No playable scene or export exists yet."
+    },
+    {
+      "at": "2026-10-03T16:32:34.697096+00:00",
+      "name": "foundation-behavior",
+      "result": "passed",
+      "details": "Headless and graphical real-scene checks returned zero failures. Headless capture excluded; graphical mouse/capture asserted. Native focus changes isolated in harness; handler exercised explicitly."
+    },
+    {
+      "at": "2026-10-03T16:32:34.697096+00:00",
+      "name": "foundation-linux-release",
+      "result": "passed",
+      "details": "Import/export and headless/graphical executable startup passed without observed errors; artifact 73,534,600 bytes."
+    },
+    {
+      "at": "2026-10-03T16:32:34.697096+00:00",
+      "name": "foundation-records",
+      "result": "passed",
+      "details": "22 local Markdown links and tracker JSON/unique IDs validated; generated executable/cache ignored; diff whitespace check passed."
+    },
+    {
+      "at": "2026-10-03T16:32:34.697096+00:00",
+      "name": "foundation-human-playtest",
+      "result": "pending",
+      "details": "Exported end-to-end human review, native alt-tab, Quit/restart, preferred window-size readability, movement feel and atmosphere. Checklist in docs/setup.md."
     }
   ],
-  "next_action": "Write docs/source/chapter_01.md, then prove a minimal Linux export."
+  "next_action": "Human review of exported foundation and proposed brief, then complete Chapter 1's investigation and checkpoint saving."
 }

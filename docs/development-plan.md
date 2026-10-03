@@ -4,7 +4,7 @@
 
 Godot with typed GDScript; native Linux first. Kowloon is the geographic reference, with selected streets, distances, and interiors adapted for play. The game should remain lightweight. Windows and macOS exports follow platform testing later.
 
-Godot 4.7.2 is verified installed and is the initial engine baseline. Renderer, exact playable area, and Chapter 1 script are not yet finalized. See [project structure](project-structure.md) for file placement and toolchain status. The Sunday 4 October 2026, 7–8 PM IST target is an attempt to deliver a playable chapter, not a commitment to complete the entire game.
+Godot 4.7.2 is verified installed and is the initial engine baseline. Compatibility is the verified foundation renderer. The small street/shop slice is implemented; full Chapter 1 boundaries and narrative remain provisional. See [project structure](project-structure.md) for file placement and toolchain status. The Sunday 4 October 2026, 7–8 PM IST target is an attempt to deliver a playable chapter, not a commitment to complete the entire game.
 
 ## Milestones in order
 
@@ -32,4 +32,4 @@ See [the shared skill library](../skills/README.md). Use scope discipline during
 
 ## Immediate next step
 
-Write the Chapter 1 brief and acceptance checklist, then create the smallest exported Linux scene. A full-city generator, comprehensive survival simulation, and additional chapters are not prerequisites for proving the first investigation.
+The [proposed Chapter 1 brief](source/chapter_01.md) and exported street/shop foundation are available; see [setup and verification](setup.md). Next, review the foundation and complete Chapter 1’s investigation and checkpoint saving. A full-city generator, comprehensive survival simulation, and additional chapters remain outside this milestone.
