@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-03T17:09:11.155750+00:00",
+  "updated_at": "2026-10-03T17:13:49.672018+00:00",
   "project": "Last Known",
   "phase": "chapter-1-placeholder",
   "current_chapter": 1,
@@ -58,7 +58,7 @@
       "title": "Complete Chapter 1 in placeholder geometry",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T17:09:11.155750+00:00",
+      "updated_at": "2026-10-03T17:13:49.672018+00:00",
       "evidence": [
         "User authorized merging foundation PR and proceeding with Chapter 1 investigation/checkpoints.",
         "Implemented upstairs/service stair and utility room, four essential records plus optional letter, journal corroboration, discovery camera, gated ending and validated checkpoints.",
@@ -67,7 +67,8 @@
         "Final headless and graphical real-scene chapter checks and foundation regressions: zero failures. Exported resource-pack graphical chapter check: zero failures.",
         "Separate write/read engine processes restored power, one unique clue, walking input and sensitivity from the exported pack checkpoint.",
         "Validated backups/corruption, incompatible/inconsistent schema, save-write failure, safe room anchors, explicit restart and failure guards for title/quit.",
-        "Linux Chapter 1 export: builds/linux/last_known.x86_64, 73,550,976 bytes. Native headless and graphical startup passed; docs/setup.md records pending human acceptance."
+        "Linux Chapter 1 export: builds/linux/last_known.x86_64, 73,550,976 bytes. Native headless and graphical startup passed; docs/setup.md records pending human acceptance.",
+        "Implementation commit 4f69d43 pushed on codex/chapter-one-investigation; draft PR https://github.com/Haze-dev1/Last-known-The-game/pull/2 opened and attached for review."
       ],
       "next_action": "Human-playtest exported chapter/checkpoints and review proposed clue details; then representative art/audio scene and benchmark. Not release ready."
     },
@@ -107,11 +108,12 @@
       "title": "Prepare Git ignore rules and agent repository workflow",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:41:26.601697+00:00",
+      "updated_at": "2026-10-03T17:13:49.672018+00:00",
       "evidence": [
-        "git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed."
+        "git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed.",
+        "Implementation commit 4f69d43 pushed on codex/chapter-one-investigation; draft PR https://github.com/Haze-dev1/Last-known-The-game/pull/2 opened and attached for review."
       ],
-      "next_action": "Work on codex/chapter-one-investigation; open a focused PR after verification. No authorization to merge that new PR yet."
+      "next_action": "Review draft PR #2 and pending human acceptance; merge requires user authorization."
     },
     {
       "id": "startup-prompt",
