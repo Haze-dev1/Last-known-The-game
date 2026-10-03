@@ -1,0 +1,39 @@
+# Godot-generated cache; keep authored resources and .uid/.import sidecars
+.godot/
+export_credentials.cfg
+
+# Generated distributions; keep the directory placeholder
+/builds/*
+!/builds/.gitkeep
+
+# Local credentials and environment configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+/.aws/
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Local editor state and temporary files
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Blender automatic backups; keep original .blend files
+*.blend[0-9]*
+
+# Runtime logs; preserve the curated project debug record
+*.log
+!/debug.log
+
+# Keep game sources, export_presets.cfg, assets-source/, skills/,
+# docs/tracker/progress.json, and debug.log versioned.

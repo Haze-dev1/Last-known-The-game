@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-03T16:09:08.820407+00:00",
+  "project": "Last Known",
+  "phase": "preproduction",
+  "current_chapter": 1,
+  "tasks": [
+    {
+      "id": "project-setup",
+      "title": "Organize docs, install skills, establish tracker and debug log",
+      "status": "completed",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:00:20.557004+00:00",
+      "evidence": [
+        "Five Codex skill installer commands reported successful installations; shared copies hash-verified.",
+        "Validated 32 local Markdown links, 21 skill file hashes, tracker JSON, unique task IDs, and task statuses."
+      ],
+      "next_action": "Read tracker at next task start."
+    },
+    {
+      "id": "godot-install",
+      "title": "Install Godot 4 stable",
+      "status": "completed",
+      "owner": "Claude",
+      "updated_at": "2026-10-03T16:01:55.327011+00:00",
+      "evidence": [
+        "Observed godot --version: 4.7.2.stable.arch_linux.ed1daf0bf"
+      ],
+      "next_action": "Engine installed; matching export templates remain to be verified during linux-export."
+    },
+    {
+      "id": "chapter-1-brief",
+      "title": "Define Chapter 1 clue chain and completion criteria",
+      "status": "pending",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:00:04.388898+00:00",
+      "evidence": [],
+      "next_action": "Draft brief under docs/source/."
+    },
+    {
+      "id": "linux-export",
+      "title": "Run minimal exported Linux build",
+      "status": "pending",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:00:04.388898+00:00",
+      "evidence": [],
+      "next_action": "Create game/project.godot and verify matching export templates; run exported Linux build."
+    },
+    {
+      "id": "chapter-1-playable",
+      "title": "Complete Chapter 1 in placeholder geometry",
+      "status": "pending",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:00:04.388898+00:00",
+      "evidence": [],
+      "next_action": "Follow the chapter brief after toolchain verification."
+    },
+    {
+      "id": "chapter-1-polish",
+      "title": "Art, audio, and performance pass",
+      "status": "pending",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:00:04.388898+00:00",
+      "evidence": [],
+      "next_action": "Benchmark representative scene before broad asset placement."
+    },
+    {
+      "id": "chapter-1-release",
+      "title": "Verify and package Chapter 1",
+      "status": "pending",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:00:04.388898+00:00",
+      "evidence": [],
+      "next_action": "Test fresh playthrough and checkpoint restoration in exported build."
+    },
+    {
+      "id": "project-structure",
+      "title": "Establish runtime, asset, build, and documentation layout",
+      "status": "completed",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:01:55.327011+00:00",
+      "evidence": [
+        "Created game/, assets-source/, tools/, builds/ and docs/project-structure.md; added ignore rules and agent instructions."
+      ],
+      "next_action": "Create Chapter 1 brief, then minimal Godot project."
+    },
+    {
+      "id": "repository-workflow",
+      "title": "Prepare Git ignore rules and agent repository workflow",
+      "status": "completed",
+      "owner": "Codex",
+      "updated_at": "2026-10-03T16:09:08.820407+00:00",
+      "evidence": [
+        "git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed."
+      ],
+      "next_action": "User creates and pushes initial commit; then agents use task branches and PRs."
+    }
+  ],
+  "blockers": [],
+  "checks": [
+    {
+      "at": "2026-10-03T16:00:20.557004+00:00",
+      "name": "project-records-validation",
+      "result": "passed",
+      "details": "Validated 32 local Markdown links, 21 skill file hashes, tracker JSON, unique task IDs, and task statuses."
+    },
+    {
+      "at": "2026-10-03T16:01:55.327011+00:00",
+      "name": "structure-and-engine-verification",
+      "result": "passed",
+      "details": "Engine version observed; project document links checked. No playable scene or export exists yet."
+    }
+  ],
+  "next_action": "Write docs/source/chapter_01.md, then prove a minimal Linux export."
+}

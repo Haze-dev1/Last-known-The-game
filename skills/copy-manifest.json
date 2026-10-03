@@ -1,0 +1,107 @@
+[
+  {
+    "file": "skills/ponytail/SKILL.md",
+    "source": "/home/haze/.agents/skills/ponytail/SKILL.md",
+    "sha256": "1316a2f3f95741d2300b116fe0c2d81ce4a9568656ed0a62643f54aaf09957f2"
+  },
+  {
+    "file": "skills/verify-claims/SKILL.md",
+    "source": "/home/haze/.agents/skills/verify-claims/SKILL.md",
+    "sha256": "b8aa49237a548e89fc9b5980b463d1b8406b2a2e9f3a9846ab5afe4fe1fb8bab"
+  },
+  {
+    "file": "skills/correctness-review/SKILL.md",
+    "source": "/home/haze/.agents/skills/correctness-review/SKILL.md",
+    "sha256": "4dd377bcdfc34c91f811a4a3df5165b0006f8c1315335e279fbece37cc5fd73c"
+  },
+  {
+    "file": "skills/correctness-review/references/severity-rubric.md",
+    "source": "/home/haze/.agents/skills/correctness-review/references/severity-rubric.md",
+    "sha256": "73f25cf09b8f569b1f96e8e90693702c651a6d5b3af2817851431560a9a4a3ad"
+  },
+  {
+    "file": "skills/diagnosing-bugs/SKILL.md",
+    "source": "/home/haze/.agents/skills/diagnosing-bugs/SKILL.md",
+    "sha256": "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84"
+  },
+  {
+    "file": "skills/diagnosing-bugs/agents/openai.yaml",
+    "source": "/home/haze/.agents/skills/diagnosing-bugs/agents/openai.yaml",
+    "sha256": "3e430dbe4334a87597488c060cb3dc3786bb00c9182877d6f5ec41f62490e90b"
+  },
+  {
+    "file": "skills/diagnosing-bugs/scripts/hitl-loop.template.sh",
+    "source": "/home/haze/.agents/skills/diagnosing-bugs/scripts/hitl-loop.template.sh",
+    "sha256": "35103539fc36873eea36074769ad454f9379d6fc8b2dc0e26ce987fd3bfe5503"
+  },
+  {
+    "file": "skills/test-quality/SKILL.md",
+    "source": "/home/haze/.agents/skills/test-quality/SKILL.md",
+    "sha256": "1e78f88511c93907deb8c1066fcd3f001040fce8728182e899d907a751e156e7"
+  },
+  {
+    "file": "skills/tech-writing/SKILL.md",
+    "source": "/home/haze/.agents/skills/tech-writing/SKILL.md",
+    "sha256": "882a98c290ca4a5419a9de1063c15a24d6835c27feb1c7ff72332ffb41f24629"
+  },
+  {
+    "file": "skills/tech-writing/references/document-types.md",
+    "source": "/home/haze/.agents/skills/tech-writing/references/document-types.md",
+    "sha256": "21232d4df2ba984a330243ad7bf339ed0094492247f593a46c8dd98c0691ebd6"
+  },
+  {
+    "file": "skills/godot-gdscript-patterns/SKILL.md",
+    "source": "/home/haze/.codex/skills/godot-gdscript-patterns/SKILL.md",
+    "sha256": "baee8a6df1556a517dcff9df8ebca0b763c3c8275752f12a146fd12eac994b55"
+  },
+  {
+    "file": "skills/godot-gdscript-patterns/references/advanced-patterns.md",
+    "source": "/home/haze/.codex/skills/godot-gdscript-patterns/references/advanced-patterns.md",
+    "sha256": "659531834c96b493caeeba32303eeacafe0ed482439933beb0a1765af7288bec"
+  },
+  {
+    "file": "skills/godot-gdscript-patterns/references/details.md",
+    "source": "/home/haze/.codex/skills/godot-gdscript-patterns/references/details.md",
+    "sha256": "f5ba3e068b89ff216f7de50862d8c02c7d7d4be02c76ff19c0f63973fa232bbc"
+  },
+  {
+    "file": "skills/godot-3d-essentials/SKILL.md",
+    "source": "/home/haze/.codex/skills/godot-3d-essentials/SKILL.md",
+    "sha256": "e2358689bf656964f3a388baf1c224dc3be2b8de460db8ac8bb1e5bf0b0a4fe8"
+  },
+  {
+    "file": "skills/godot-3d-essentials/references/scene-and-environment.md",
+    "source": "/home/haze/.codex/skills/godot-3d-essentials/references/scene-and-environment.md",
+    "sha256": "b4de6267588f540baa7e4fa149fd4653ace4324e1b17b7655d0f6551a735b428"
+  },
+  {
+    "file": "skills/godot-audio/SKILL.md",
+    "source": "/home/haze/.codex/skills/godot-audio/SKILL.md",
+    "sha256": "b75829c3c47539f4e1fa2b623ebfce6fa4f5eef2ddc950d00265c27cfae2e0db"
+  },
+  {
+    "file": "skills/godot-audio/references/buses-and-effects.md",
+    "source": "/home/haze/.codex/skills/godot-audio/references/buses-and-effects.md",
+    "sha256": "da6a33ae46b21f3526e74c5e383781e02f1f6ca0bd755475b21e14f124a52526"
+  },
+  {
+    "file": "skills/godot-ui-control/SKILL.md",
+    "source": "/home/haze/.codex/skills/godot-ui-control/SKILL.md",
+    "sha256": "9ac89920e74bbf8d939b4d565e350d53b07c9afbe0970345c97d4122f590cfd5"
+  },
+  {
+    "file": "skills/godot-ui-control/references/layout-and-theming.md",
+    "source": "/home/haze/.codex/skills/godot-ui-control/references/layout-and-theming.md",
+    "sha256": "2b5a7d64f00709640385adda215aa3f9a839c2d461c53c886ba9c320723a9f3d"
+  },
+  {
+    "file": "skills/godot-export/SKILL.md",
+    "source": "/home/haze/.codex/skills/godot-export/SKILL.md",
+    "sha256": "e97f0a889b8e06934aced7fdcee667d5bb848e33bc44d500c92f580e60295305"
+  },
+  {
+    "file": "skills/godot-export/references/presets-and-cli.md",
+    "source": "/home/haze/.codex/skills/godot-export/references/presets-and-cli.md",
+    "sha256": "ddb73ed10a107d806e883a1d13c6a78377226223d57b536201dda9c97505ae62"
+  }
+]

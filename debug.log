@@ -1,0 +1,6 @@
+2026-10-03T16:00:04.388898+00:00 | Codex | project-setup | INFO | Installed five Godot skills; copied and hash-verified local references; reorganized docs and initialized tracker. Godot runtime has not been tested in this task.
+2026-10-03T16:00:20.557004+00:00 | Codex | project-setup | INFO | Validated 32 local Markdown links, 21 skill file hashes, tracker JSON, unique task IDs, and task statuses.
+2026-10-03T16:01:55.327011+00:00 | Codex | godot-install | INFO | godot --version returned 4.7.2.stable.arch_linux.ed1daf0bf.
+2026-10-03T16:01:55.327011+00:00 | Codex | linux-export | INFO | Matching templates absent at two checked paths; other locations not checked. Verify before first export.
+2026-10-03T16:01:55.327011+00:00 | Codex | project-structure | INFO | Reserved runtime/source/tools/build directories, documented layout, validated document links and tracker JSON.
+2026-10-03T16:09:08.820407+00:00 | Codex | repository-workflow | INFO | git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed.
