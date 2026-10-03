@@ -24,7 +24,7 @@ Game/
 └── skills/               # Shared agent guidance; never shipped with the game
 ```
 
-The four implementation/output directories are reserved now. Create their subdirectories only when real content needs them. `game/project.godot` does not yet exist; the next toolchain task creates it.
+The four implementation/output directories are reserved now. Create their subdirectories only when real content needs them. `game/project.godot` now runs the first street/shop foundation. See [setup and verification](setup.md).
 
 ## Organize the Godot project by feature
 
@@ -52,13 +52,12 @@ Produce Linux builds under `builds/linux/`. Later platforms use sibling director
 
 Verified locally: `godot --version` returns `4.7.2.stable.arch_linux.ed1daf0bf`. Use Godot 4.7.2 for the initial chapter. Recheck after system updates; an engine upgrade must be deliberate and followed by import, gameplay, and export checks.
 
-Export templates were not found in the two checked directories: `~/.local/share/godot/export_templates/4.7.2.stable` and `/usr/share/godot/export_templates/4.7.2.stable`. Their availability elsewhere remains unverified. Resolve this during the first export task. No launch or export command for this project is verified yet.
+Matching official Linux 4.7.2 templates are installed under `~/.local/share/godot/export_templates/4.7.2.stable`. Compatibility import, real-scene checks, and Linux release export/startup have been verified; exact commands and limitations are recorded in [setup](setup.md).
 
 ## Next work
 
-1. Write `docs/source/chapter_01.md`: opening, objective, clue dependencies, ending, and acceptance checks.
-2. Create `game/project.godot` and a minimal scene; verify editor import and a Linux export.
-3. Implement a walkable street and one complete interaction before broad world construction.
-4. Finish the chapter using placeholder art, then improve visuals and sound against measured budgets.
+1. Review the proposed [Chapter 1 brief](source/chapter_01.md) and playtest the exported foundation.
+2. Complete the apartment/utility-room investigation and checkpoint saving.
+3. Finish the chapter in placeholder geometry before improving art and sound against measured budgets.
 
 Update `docs/tracker/progress.json` and append relevant checks to root `debug.log` as required by `AGENTS.md`.
