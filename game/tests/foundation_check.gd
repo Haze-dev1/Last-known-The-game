@@ -52,7 +52,9 @@ func aim(from: Vector3, at: Vector3) -> void:
 
 func add_chapter() -> void:
 	chapter = Scene.instantiate() as Chapter
+	chapter.checkpoint_path = "user://checks/foundation.json"
 	root.add_child(chapter)
+	chapter.start_new_game()
 	# Test automation must not depend on the desktop keeping this window focused.
 	# The focus-loss handler is exercised explicitly below; native focus is manual.
 	root.focus_exited.disconnect(chapter._on_focus_lost)

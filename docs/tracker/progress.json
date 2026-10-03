@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-03T16:35:03.353421+00:00",
+  "updated_at": "2026-10-03T17:09:11.155750+00:00",
   "project": "Last Known",
-  "phase": "foundation",
+  "phase": "chapter-1-placeholder",
   "current_chapter": 1,
   "tasks": [
     {
@@ -26,18 +26,19 @@
       "evidence": [
         "Observed godot --version: 4.7.2.stable.arch_linux.ed1daf0bf"
       ],
-      "next_action": "Engine installed; matching export templates remain to be verified during linux-export."
+      "next_action": "Matching official Linux 4.7.2 templates installed and exercised; deliberate upgrade only."
     },
     {
       "id": "chapter-1-brief",
       "title": "Define Chapter 1 clue chain and completion criteria",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:14:55.121081+00:00",
+      "updated_at": "2026-10-03T17:09:11.155750+00:00",
       "evidence": [
-        "Proposed chapter brief separates foundation from later corroboration, apartment, utility room, ending and checkpoints."
+        "Proposed chapter brief separates foundation from later corroboration, apartment, utility room, ending and checkpoints.",
+        "Updated brief to distinguish implemented placeholder chapter, proposed clue text/chronology and remaining art/human acceptance."
       ],
-      "next_action": "User reviews narrative proposals; implement only foundation slice."
+      "next_action": "User reviews proposed N-04 chronology, photo description and onward station/shelter lead."
     },
     {
       "id": "linux-export",
@@ -55,11 +56,20 @@
     {
       "id": "chapter-1-playable",
       "title": "Complete Chapter 1 in placeholder geometry",
-      "status": "pending",
+      "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:32:34.697096+00:00",
-      "evidence": [],
-      "next_action": "Complete Chapter 1 investigation (apartment, utility room, independent evidence and onward lead) and checkpoint saving after foundation review."
+      "updated_at": "2026-10-03T17:09:11.155750+00:00",
+      "evidence": [
+        "User authorized merging foundation PR and proceeding with Chapter 1 investigation/checkpoints.",
+        "Implemented upstairs/service stair and utility room, four essential records plus optional letter, journal corroboration, discovery camera, gated ending and validated checkpoints.",
+        "First headless chapter test reported zero failures after correcting traversal timing and original-camera comparison. Backup/corrupt-save and write-failure paths exercised.",
+        "Implemented four-essential-record investigation and optional letter, upstairs/service stair, utility room, journal reconstruction, first-person discovery and gated chapter ending. Narrative remains proposed; photograph is a text stand-in.",
+        "Final headless and graphical real-scene chapter checks and foundation regressions: zero failures. Exported resource-pack graphical chapter check: zero failures.",
+        "Separate write/read engine processes restored power, one unique clue, walking input and sensitivity from the exported pack checkpoint.",
+        "Validated backups/corruption, incompatible/inconsistent schema, save-write failure, safe room anchors, explicit restart and failure guards for title/quit.",
+        "Linux Chapter 1 export: builds/linux/last_known.x86_64, 73,550,976 bytes. Native headless and graphical startup passed; docs/setup.md records pending human acceptance."
+      ],
+      "next_action": "Human-playtest exported chapter/checkpoints and review proposed clue details; then representative art/audio scene and benchmark. Not release ready."
     },
     {
       "id": "chapter-1-polish",
@@ -75,9 +85,11 @@
       "title": "Verify and package Chapter 1",
       "status": "pending",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:00:04.388898+00:00",
-      "evidence": [],
-      "next_action": "Test fresh playthrough and checkpoint restoration in exported build."
+      "updated_at": "2026-10-03T17:09:11.155750+00:00",
+      "evidence": [
+        "Placeholder release executable exported and started; source/pack automation passed, including checkpoint restore."
+      ],
+      "next_action": "Pending human exported fresh playthrough, native focus/quit/restart, checkpoint review, art/performance and release acceptance."
     },
     {
       "id": "project-structure",
@@ -88,18 +100,18 @@
       "evidence": [
         "Created game/, assets-source/, tools/, builds/ and docs/project-structure.md; added ignore rules and agent instructions."
       ],
-      "next_action": "Create Chapter 1 brief, then minimal Godot project."
+      "next_action": "Runtime and setup documents updated for Chapter 1/checkpoints; keep generated exports ignored."
     },
     {
       "id": "repository-workflow",
       "title": "Prepare Git ignore rules and agent repository workflow",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:35:03.353421+00:00",
+      "updated_at": "2026-10-03T16:41:26.601697+00:00",
       "evidence": [
         "git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed."
       ],
-      "next_action": "Review draft PR #1; merge only with user authorization. Initial push verified and task branch pushed using command-specific HTTPS push URL."
+      "next_action": "Work on codex/chapter-one-investigation; open a focused PR after verification. No authorization to merge that new PR yet."
     },
     {
       "id": "startup-prompt",
@@ -117,15 +129,16 @@
       "title": "First playable street/shop/power/clue foundation",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:35:03.353421+00:00",
+      "updated_at": "2026-10-03T17:09:11.155750+00:00",
       "evidence": [
         "Street/shop blockout, first-person collision/mouse look, power source, one saved clue, evidence HUD, skippable arrival, computer exit, pause/resume and sensitivity implemented.",
         "Real-scene headless and graphical behavior checks reported FOUNDATION CHECK: 0 failures; screenshots inspected for readable route and UI.",
         "Checks exercise no-power rejection, repeat interactions, power-first order, held movement in menus, arrival completion/skips, mouse capture/look, wall occlusion and exterior collision boundaries.",
         "docs/setup.md records commands, build size, graphical driver, test limits and pending human review; no complete chapter or performance claim.",
-        "Implementation commit f6f1bb6 pushed on codex/first-playable-foundation; draft PR https://github.com/Haze-dev1/Last-known-The-game/pull/1 opened; no merge or game publication."
+        "Implementation commit f6f1bb6 pushed on codex/first-playable-foundation; draft PR https://github.com/Haze-dev1/Last-known-The-game/pull/1 opened; no merge or game publication.",
+        "PR #1 merged with user authorization at merge commit 3d20b24531cbbfb828c6695eb2ca5670f60f0a15."
       ],
-      "next_action": "Review proposed story details and human-playtest foundation; next bounded task is Chapter 1 investigation and checkpoint saving."
+      "next_action": "Merged into main with authorization; original behavior protected by passing regression checks in Chapter 1 branch."
     }
   ],
   "blockers": [],
@@ -165,7 +178,37 @@
       "name": "foundation-human-playtest",
       "result": "pending",
       "details": "Exported end-to-end human review, native alt-tab, Quit/restart, preferred window-size readability, movement feel and atmosphere. Checklist in docs/setup.md."
+    },
+    {
+      "at": "2026-10-03T17:09:11.155750+00:00",
+      "name": "chapter-one-behavior",
+      "result": "passed",
+      "details": "Headless/graphical source chapter checks and foundation regressions returned zero failures; graphical exported-pack chapter check returned zero failures. Route uses injected engine input with placed clue approaches; native pointer steering isolated in chapter harness."
+    },
+    {
+      "at": "2026-10-03T17:09:11.155750+00:00",
+      "name": "chapter-one-process-checkpoint",
+      "result": "passed",
+      "details": "Two separate editor processes using exported pack wrote and restored a powered one-clue checkpoint, sensitivity and walking input. Real test files isolated under user://checks/."
+    },
+    {
+      "at": "2026-10-03T17:09:11.155750+00:00",
+      "name": "chapter-one-export",
+      "result": "passed",
+      "details": "Matching 4.7.2 Linux Chapter 1 release export and native executable headless/graphical startup passed. Binary 73,550,976 bytes; tests excluded."
+    },
+    {
+      "at": "2026-10-03T17:09:11.155750+00:00",
+      "name": "chapter-one-records",
+      "result": "passed",
+      "details": "22 local Markdown links, tracker JSON/unique IDs and git diff --check passed; source/checkpoint/test code reviewed for prerequisites, idempotence, validation and error visibility."
+    },
+    {
+      "at": "2026-10-03T17:09:11.155750+00:00",
+      "name": "chapter-one-human-acceptance",
+      "result": "pending",
+      "details": "Human exported fresh playthrough and checkpoint resume, native focus, Quit/restart, atmosphere, clue comprehension and preferred window sizes. Art/performance pass not done; release remains pending."
     }
   ],
-  "next_action": "Human review of exported foundation and proposed brief, then complete Chapter 1's investigation and checkpoint saving."
+  "next_action": "Human review of placeholder Chapter 1 and checkpoints, then representative art/audio scene and performance benchmark."
 }
