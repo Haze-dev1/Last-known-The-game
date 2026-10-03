@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-03T16:32:34.697096+00:00",
+  "updated_at": "2026-10-03T16:35:03.353421+00:00",
   "project": "Last Known",
   "phase": "foundation",
   "current_chapter": 1,
@@ -95,11 +95,11 @@
       "title": "Prepare Git ignore rules and agent repository workflow",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:32:34.697096+00:00",
+      "updated_at": "2026-10-03T16:35:03.353421+00:00",
       "evidence": [
         "git check-ignore verified 7 excluded and 10 retained paths. Existing staged files preserved; no commit or push performed."
       ],
-      "next_action": "Initial pushed commit f42287c verified via GitHub API; task branch uses authenticated HTTPS for push because local SSH access failed."
+      "next_action": "Review draft PR #1; merge only with user authorization. Initial push verified and task branch pushed using command-specific HTTPS push URL."
     },
     {
       "id": "startup-prompt",
@@ -117,12 +117,13 @@
       "title": "First playable street/shop/power/clue foundation",
       "status": "completed",
       "owner": "Codex",
-      "updated_at": "2026-10-03T16:32:34.697096+00:00",
+      "updated_at": "2026-10-03T16:35:03.353421+00:00",
       "evidence": [
         "Street/shop blockout, first-person collision/mouse look, power source, one saved clue, evidence HUD, skippable arrival, computer exit, pause/resume and sensitivity implemented.",
         "Real-scene headless and graphical behavior checks reported FOUNDATION CHECK: 0 failures; screenshots inspected for readable route and UI.",
         "Checks exercise no-power rejection, repeat interactions, power-first order, held movement in menus, arrival completion/skips, mouse capture/look, wall occlusion and exterior collision boundaries.",
-        "docs/setup.md records commands, build size, graphical driver, test limits and pending human review; no complete chapter or performance claim."
+        "docs/setup.md records commands, build size, graphical driver, test limits and pending human review; no complete chapter or performance claim.",
+        "Implementation commit f6f1bb6 pushed on codex/first-playable-foundation; draft PR https://github.com/Haze-dev1/Last-known-The-game/pull/1 opened; no merge or game publication."
       ],
       "next_action": "Review proposed story details and human-playtest foundation; next bounded task is Chapter 1 investigation and checkpoint saving."
     }
