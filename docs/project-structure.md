@@ -24,7 +24,7 @@ Game/
 └── skills/               # Shared agent guidance; never shipped with the game
 ```
 
-The four implementation/output directories are reserved now. Create their subdirectories only when real content needs them. `game/project.godot` now runs the first street/shop foundation. See [setup and verification](setup.md).
+The four implementation/output directories are reserved now. Create their subdirectories only when real content needs them. `game/project.godot` now runs the placeholder Chapter 1 investigation. See [setup and verification](setup.md).
 
 ## Organize the Godot project by feature
 
@@ -56,8 +56,8 @@ Matching official Linux 4.7.2 templates are installed under `~/.local/share/godo
 
 ## Next work
 
-1. Review the proposed [Chapter 1 brief](source/chapter_01.md) and playtest the exported foundation.
-2. Complete the apartment/utility-room investigation and checkpoint saving.
-3. Finish the chapter in placeholder geometry before improving art and sound against measured budgets.
+1. Review the proposed [Chapter 1 brief](source/chapter_01.md) and playtest the exported chapter/checkpoint flow.
+2. Build one representative art/audio scene and benchmark it.
+3. Apply a measured detail pass and complete human release checks before publishing.
 
 Update `docs/tracker/progress.json` and append relevant checks to root `debug.log` as required by `AGENTS.md`.

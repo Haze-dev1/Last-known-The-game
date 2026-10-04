@@ -2,9 +2,9 @@
 
 A first-person survival mystery set in an abandoned urban area reclaimed by nature over decades. The player investigates a personal disappearance through physical evidence, recovered computers, and fragments of the city's communications infrastructure.
 
-This workspace contains design documents and a runnable street/shop foundation. The title is provisional.
+This workspace contains design documents and a runnable placeholder Chapter 1 with investigation and checkpoints. The title is provisional.
 
-- [Run and verify the foundation](setup.md)
+- [Run and verify Chapter 1](setup.md)
 - [Proposed Chapter 1 brief](source/chapter_01.md)
 
 ## Design documents
