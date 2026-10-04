@@ -143,9 +143,11 @@ void fragment() {
 	float grime = fbm(uv * vec2(0.07, 0.025) + seed * 17.0);
 	col *= 0.62 + 0.45 * grime;
 
-	float moss_mask = clamp(smoothstep(2.6, 0.0, uv.y) + smoothstep(0.62, 0.8, fbm(uv * 0.12 + seed * 7.0)) * 0.8, 0.0, 1.0);
+	// algae and moss: wet base, patches, and green runs below every slab line
+	float runs = smoothstep(0.5, 0.0, cell.y) * smoothstep(0.55, 0.8, vnoise(vec2(uv.x * 1.7, fl * 3.1 + seed * 11.0))) * step(4.6, uv.y);
+	float moss_mask = clamp(smoothstep(4.0, 0.0, uv.y) + smoothstep(0.55, 0.78, fbm(uv * 0.12 + seed * 7.0)) + runs * 0.7, 0.0, 1.0);
 	vec3 moss = texture(moss_albedo, tuv * 0.8).rgb;
-	col = mix(col, moss * 0.85, moss_mask * 0.75);
+	col = mix(col, moss * vec3(0.8, 0.95, 0.7), moss_mask * 0.8);
 	nmap = mix(nmap, texture(moss_normal, tuv * 0.8).rgb, moss_mask * 0.6);
 	if ((flags & 2) != 0) {
 		float vine = fbm(uv * 0.35 + seed * 13.0) - uv.y * 0.03;

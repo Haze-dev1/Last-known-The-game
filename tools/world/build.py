@@ -56,7 +56,7 @@ BG_N = (806000, 832000)
 BG_STEP = 60
 
 # ---------------------------------------------------------------- materials / ids
-M_TERRAIN, M_ROAD, M_PAVING, M_FACADE, M_ROOF, M_RAIL, M_CONCRETE, M_PROP, M_IVY = range(9)
+M_TERRAIN, M_ROAD, M_PAVING, M_FACADE, M_ROOF, M_RAIL, M_CONCRETE, M_PROP, M_IVY, M_DETAIL = range(10)
 A_BANYAN, A_SLENDER, A_SHRUB, A_GRASS, A_LAMP, A_CAR, A_BUS, A_BLOB, A_FERN = range(9)
 
 ROAD_CLASSES = {
@@ -494,7 +494,7 @@ def ribbon(ms, line, widths, heights_fn, mat, collide, c0, c1, offset, max_step=
     return pts, s, t
 
 
-def extrude_walls(ms, ring, bottom, top, mat, collide, c0, c1, ground_ref):
+def extrude_walls(ms, ring, bottom, top, mat, collide, c0, c1, ground_ref, flip=False):
     ring = np.asarray(ring, np.float64)
     if np.allclose(ring[0], ring[-1]):
         ring = ring[:-1]
@@ -512,6 +512,8 @@ def extrude_walls(ms, ring, bottom, top, mat, collide, c0, c1, ground_ref):
     # outward normal: ring orientation decides the sign
     area2 = np.sum(a[:, 0] * b[:, 1] - b[:, 0] * a[:, 1])
     sign = 1.0 if area2 > 0 else -1.0
+    if flip:
+        sign = -sign
     nx, nz = edge[:, 1] * sign, -edge[:, 0] * sign
     nl = np.maximum(np.hypot(nx, nz), 1e-9)
     nx, nz = nx / nl, nz / nl
@@ -1146,7 +1148,7 @@ def build_building(near, far, boxes, b, major_tree, major_lines, mm):
     tint = tints[seed % len(tints)]
     shade = 0.92 + ((seed >> 4) % 16) / 100.0
     c0 = tuple(int(min(255, v * shade * 255)) for v in tint) + (style * 32 + 16,)
-    flags = (1 if style in (STYLE_TONGLAU, STYLE_COMMERCIAL, STYLE_PODIUM) else 0) | (2 if (seed >> 10) % 100 < 12 and style in (STYLE_TONGLAU, STYLE_SHED, STYLE_INDUSTRIAL) else 0)
+    flags = (1 if style in (STYLE_TONGLAU, STYLE_COMMERCIAL, STYLE_PODIUM) else 0) | (2 if (seed >> 10) % 100 < (40 if style in (STYLE_TONGLAU, STYLE_SHED, STYLE_INDUSTRIAL, STYLE_PODIUM) else 22) else 0)
     c1 = ((seed >> 16) % 256, int(np.clip((top - ground) * 0.5, 0, 255)), flags, 255)
     roof_c0 = (int(tint[0] * 150), int(tint[1] * 148), int(tint[2] * 140), style * 32 + 16)
     for poly in shapely.get_parts(g):
@@ -1186,6 +1188,8 @@ def build_building(near, far, boxes, b, major_tree, major_lines, mm):
         # hanging street signs and concrete shop canopies on buildings facing major roads
         if style in (STYLE_TONGLAU, STYLE_RES, STYLE_COMMERCIAL, STYLE_PODIUM) and top - ground > 8:
             add_signs(near, p, ground, top, seed, major_tree, major_lines, mm)
+        add_roofline(near, p, ground, top, seed, style, c0, c1, roof_c0)
+        add_balconies(near, mm, p, ground, top, seed, style, c0)
         add_ivy(near, p, ground, top, seed, style)
         add_roof_garden(mm, p, ground, top, seed, style)
 
@@ -1245,7 +1249,7 @@ def add_signs(ms, p, ground, top, seed, major_tree, major_lines, mm):
 
 VEG = {
     # class: (tree prob, shrub prob, grass prob)
-    T_PAVED: (0.005, 0.035, 0.20),
+    T_PAVED: (0.006, 0.06, 0.34),
     T_PARK: (0.09, 0.18, 0.95),
     T_WOOD: (0.24, 0.22, 0.12),
     T_SCRUB: (0.045, 0.40, 0.95),
@@ -1292,7 +1296,8 @@ def place_vegetation(mm_near, mm_far, terr, cls, i, j, building_tree, road_poly_
     on_road = np.zeros(len(xs), bool)
     on_road[road_hit[0]] = True
     # grass survives in road edges/cracks; shrubs and trees do not
-    blocked |= on_road & (ks != A_GRASS)
+    small_ok = (ks == A_SHRUB) & ((np.arange(len(ks)) % 3) == 0)
+    blocked |= on_road & (ks != A_GRASS) & ~small_ok
     ys = terr.at(xs, zs)
     underwater = ys < SEA_LEVEL + 0.3
     blocked |= underwater
@@ -1463,8 +1468,8 @@ def style_canopy_ok(seed, k):
     return h32("canopy", seed, k) % 100 < 55
 
 
-IVY_CHANCE = {STYLE_TONGLAU: 38, STYLE_SHED: 55, STYLE_INDUSTRIAL: 30, STYLE_PODIUM: 34, STYLE_RES: 14,
-              STYLE_PUBLIC: 10, STYLE_COMMERCIAL: 6, STYLE_CANOPY: 0}
+IVY_CHANCE = {STYLE_TONGLAU: 70, STYLE_SHED: 85, STYLE_INDUSTRIAL: 60, STYLE_PODIUM: 65, STYLE_RES: 40,
+              STYLE_PUBLIC: 32, STYLE_COMMERCIAL: 18, STYLE_CANOPY: 0}
 
 
 def add_ivy(ms, p, ground, top, seed, style):
@@ -1484,16 +1489,16 @@ def add_ivy(ms, p, ground, top, seed, style):
             continue
         d = (b - a) / L
         out = np.array([d[1], -d[0]]) * sign
-        w = min(L, 2.5 + ((hh >> 7) % 100) / 100.0 * 9.0)
+        w = min(L, 3.0 + ((hh >> 7) % 100) / 100.0 * 14.0)
         f0 = ((hh >> 14) % 100) / 100.0 * (L - w)
         p0 = a + d * f0 + out * 0.12
         p1 = p0 + d * w
         hanging = (hh >> 21) % 3 != 0 or height < 6
         if hanging:
-            length = min(height - 0.3, 3.0 + ((hh >> 23) % 100) / 100.0 * min(22.0, height))
+            length = min(height - 0.3, 4.0 + ((hh >> 23) % 100) / 100.0 * min(40.0, height))
             y_top, y_bot = top + 0.5, top - length
         else:
-            length = min(height - 0.5, 2.5 + ((hh >> 23) % 100) / 100.0 * 9.0)
+            length = min(height - 0.5, 3.0 + ((hh >> 23) % 100) / 100.0 * 16.0)
             y_top, y_bot = ground + length, ground - 0.3
         P = np.array([[p0[0], y_bot, p0[1]], [p1[0], y_bot, p1[1]], [p1[0], y_top, p1[1]], [p0[0], y_top, p0[1]]])
         n = np.array([out[0], 0.0, out[1]])
@@ -1509,13 +1514,13 @@ def add_ivy(ms, p, ground, top, seed, style):
 
 def add_roof_garden(mm, p, ground, top, seed, style):
     """Self-seeded growth on low and mid-rise roofs: grass, ferns, shrubs, the odd young tree."""
-    if style in (STYLE_CANOPY,) or top - ground > 45 or p.area < 25:
+    if style in (STYLE_CANOPY,) or top - ground > 120 or p.area < 25:
         return
     hh = h32("roofg", seed)
-    if hh % 100 >= (60 if style in (STYLE_TONGLAU, STYLE_SHED, STYLE_INDUSTRIAL, STYLE_PODIUM) else 30):
+    if hh % 100 >= (85 if style in (STYLE_TONGLAU, STYLE_SHED, STYLE_INDUSTRIAL, STYLE_PODIUM) else 55):
         return
     minx, minz, maxx, maxz = p.bounds
-    count = int(min(30, p.area / 18))
+    count = int(min(60, p.area / 10))
     prepared = shapely.prepared.prep(p.buffer(-0.8))
     for q in range(count * 2):
         hq = h32("rg", seed, q)
@@ -1530,6 +1535,102 @@ def add_roof_garden(mm, p, ground, top, seed, style):
         count -= 1
         if count <= 0:
             break
+
+
+
+ROOFLINE_STYLES = (STYLE_RES, STYLE_PUBLIC, STYLE_TONGLAU, STYLE_INDUSTRIAL, STYLE_COMMERCIAL, STYLE_PODIUM)
+FLOOR_H = {STYLE_RES: 3.0, STYLE_TONGLAU: 3.3, STYLE_PUBLIC: 2.8}
+
+
+def add_roofline(ms, p, ground, top, seed, style, c0, c1, roof_c0):
+    """Parapet walls, stair/lift penthouses and setback crowns instead of a bare flat cut."""
+    if style not in ROOFLINE_STYLES or p.area < 20:
+        return
+    height = top - ground
+    par = 0.9 + (seed % 3) * 0.2
+    inner = p.buffer(-0.25, join_style="mitre")
+    if inner.is_empty or inner.geom_type != "Polygon":
+        return
+    extrude_walls(ms, p.exterior.coords, top, top + par, M_FACADE, True, c0, c1, ground)
+    extrude_walls(ms, inner.exterior.coords, top - 0.05, top + par, M_CONCRETE, True, roof_c0, c1, ground, flip=True)
+    cap(ms, p.difference(inner), top + par, M_CONCRETE, True, roof_c0, c1)
+    if height < 18 or p.area < 120:
+        return
+    hh = h32("crown", seed)
+    # setback crown on tall towers, then a lift/stair penthouse
+    level_top = top
+    shape = p
+    if height > 60 and hh % 100 < 55:
+        setback = max(1.5, math.sqrt(p.area) * 0.12)
+        crown = p.buffer(-setback, join_style="mitre").simplify(0.4)
+        if not crown.is_empty and crown.geom_type == "Polygon" and crown.area > 60:
+            ch = 3.0 * (1 + hh % 3)
+            extrude_walls(ms, crown.exterior.coords, top - 0.2, top + ch, M_FACADE, True, c0, c1, ground)
+            cap(ms, crown, top + ch, M_ROOF, True, roof_c0, c1)
+            level_top, shape = top + ch, crown
+    pent = shape.buffer(-max(2.5, math.sqrt(shape.area) * 0.3), join_style="mitre").simplify(0.5)
+    if not pent.is_empty and pent.geom_type == "Polygon" and pent.area > 12:
+        ph = 3.2 + (hh >> 5) % 3
+        extrude_walls(ms, pent.exterior.coords, level_top - 0.2, level_top + ph, M_FACADE, True, c0, c1, ground)
+        cap(ms, pent, level_top + ph, M_ROOF, True, roof_c0, c1)
+
+
+def add_balconies(ms, mm, p, ground, top, seed, style, c0):
+    """Enclosed tong lau balcony bands and tower balconies with railings; many hold plants now."""
+    if style not in FLOOR_H:
+        return
+    fh = FLOOR_H[style]
+    height = top - ground
+    if height < 8:
+        return
+    ring = np.asarray(p.exterior.coords)
+    area2 = np.sum(ring[:-1, 0] * ring[1:, 1] - ring[1:, 0] * ring[:-1, 1])
+    sign = 1.0 if area2 > 0 else -1.0
+    slab_c = tuple(int(v * 0.9) for v in c0[:3]) + (255,)
+    rail_c = (62, 64, 62, 255)
+    budget = 70
+    floors = int((height - 5.0) // fh)
+    for k in range(len(ring) - 1):
+        a, b = ring[k], ring[k + 1]
+        L = float(np.hypot(*(b - a)))
+        hk = h32("balc", seed, k)
+        if L < 5 or hk % 100 >= (65 if style == STYLE_TONGLAU else 45):
+            continue
+        d = (b - a) / L
+        out = np.array([d[1], -d[0]]) * sign
+        yaw = math.atan2(out[0], out[1])
+        if style == STYLE_TONGLAU:
+            spans = [(0.5, L * 0.8)]  # one band across the frontage
+            every = 1
+        else:
+            nb = max(1, int(L // 7))
+            spans = [((q + 0.5) / nb, min(3.2, L / nb * 0.6)) for q in range(nb) if h32("bs", seed, k, q) % 3 != 0]
+            every = 1 + (hk >> 7) % 2
+        depth = 0.9 if style == STYLE_TONGLAU else 1.1
+        for f in range(1, floors + 1, every):
+            y = ground + 4.6 + (f - 1) * fh
+            if y > top - 2.0:
+                break
+            for frac, width in spans:
+                if budget <= 0:
+                    return
+                budget -= 1
+                cpt = a + (b - a) * frac + out * (depth / 2)
+                box_mesh(ms, M_DETAIL, False, (cpt[0], y, cpt[1]), (width / 2, 0.09, depth / 2), yaw, slab_c)
+                front = cpt + out * (depth / 2 - 0.05)
+                if style == STYLE_TONGLAU:
+                    box_mesh(ms, M_DETAIL, False, (front[0], y + 0.55, front[1]), (width / 2, 0.46, 0.06), yaw, slab_c)
+                else:
+                    box_mesh(ms, M_DETAIL, False, (front[0], y + 0.55, front[1]), (width / 2, 0.03, 0.03), yaw, rail_c)
+                    for r in range(int(width // 0.8) + 1):
+                        rp = front - d * (width / 2) + d * min(width, r * 0.8)
+                        box_mesh(ms, M_DETAIL, False, (rp[0], y + 0.3, rp[1]), (0.02, 0.24, 0.02), yaw, rail_c)
+                hp = h32("bp", seed, k, f, frac)
+                if hp % 100 < 38:
+                    kind = (A_FERN, A_SHRUB, A_GRASS, A_FERN)[(hp >> 8) % 4]
+                    pp = cpt + d * (((hp >> 12) % 100) / 100.0 - 0.5) * width * 0.7
+                    mm[kind].append((pp[0], y + 0.09, pp[1], (hp % 628) / 100.0, 0.45 + ((hp >> 16) % 40) / 100.0, (1.0, 1.0, 1.0, 1.0), 0.0))
+
 
 if __name__ == "__main__":
     sys.exit(main())

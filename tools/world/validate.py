@@ -101,7 +101,7 @@ def main():
             dx = np.maximum(np.maximum(i * cs - pos[:, 0], pos[:, 0] - (i + 1) * cs), 0)
             dz = np.maximum(np.maximum(j * cs - pos[:, 2], pos[:, 2] - (j + 1) * cs), 0)
             o = float(np.max(np.maximum(dx, dz)))
-            if mat in (3, 4, 6, 7, 8):  # facades, roofs, canopies/rooftop structures, signs, ivy
+            if mat in (3, 4, 6, 7, 8, 9):  # facades, roofs, canopies/rooftop structures, signs, ivy
                 max_overflow = max(max_overflow, o)
             else:
                 max_other = max(max_other, o)
