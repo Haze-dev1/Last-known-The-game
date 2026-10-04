@@ -3,6 +3,7 @@ config_version=5
 [application]
 config/name="Last Known"
 run/main_scene="res://chapters/chapter_01/chapter_01.tscn"
+run/main_scene.kowloon_world="res://world/world.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
