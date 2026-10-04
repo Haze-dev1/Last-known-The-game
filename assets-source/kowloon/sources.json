@@ -1,0 +1,49 @@
+{
+  "coordinate_system": "Hong Kong 1980 Grid (EPSG:2326), metres; heights in metres above Hong Kong Principal Datum (mPD)",
+  "sources": [
+    {
+      "id": "landsd_dtm_5m",
+      "title": "Digital Terrain Model (DTM), 5 m grid, whole Hong Kong",
+      "publisher": "Lands Department, HKSAR Government",
+      "url": "https://www.landsd.gov.hk/landsd_psi_data/SMO/data/Whole_HK_DTM_5m.zip",
+      "catalogue": "https://data.gov.hk/en-data/dataset/hk-landsd-openmap-5m-grid-dtm",
+      "file": "Whole_HK_DTM_5m.zip",
+      "bytes": 28706079,
+      "sha256": "785718f462ae6de3c9e1fed2bf9fe5affe1c1d739c0a969fd62cf3680b4b33ab",
+      "server_last_modified": "2023-09-14",
+      "inner_file": "Whole_HK_DTM_5m.asc (ArcInfo ASCII grid, 12751 x 9601 cells, xll 799997.5, yll 799997.5, cellsize 5, nodata -9999, file dated 2019-03-11)",
+      "retrieved": "2026-10-04",
+      "license": "DATA.GOV.HK Terms and Conditions of Use: free commercial and non-commercial reuse with attribution to the HKSAR Government, Lands Department and DATA.GOV.HK",
+      "attribution": "Digital Terrain Model © Lands Department, The Government of the Hong Kong SAR, via DATA.GOV.HK",
+      "limitations": "Stated accuracy +/-5 m. Includes non-ground structures such as elevated roads and bridges; the pipeline removes OSM bridge corridors before using it as ground."
+    },
+    {
+      "id": "osm_hong_kong",
+      "title": "OpenStreetMap Hong Kong extract (Geofabrik daily snapshot 2026-10-03)",
+      "publisher": "OpenStreetMap contributors, extract by Geofabrik GmbH",
+      "url": "https://download.geofabrik.de/asia/china/hong-kong-261003.osm.pbf",
+      "file": "hong-kong-261003.osm.pbf",
+      "bytes": 37607921,
+      "sha256": "40bb89253f3c6465f8ee9310e5fd679defc557dc571498f38aabd0ce1b30587d",
+      "retrieved": "2026-10-04",
+      "license": "Open Database License (ODbL) 1.0",
+      "attribution": "© OpenStreetMap contributors, ODbL",
+      "limitations": "Geofabrik keeps dated daily files only for a limited period; the checksum pins the snapshot and the raw file must be archived outside Git if the URL expires. Volunteer data: road widths, layers and land use are inconsistent in places."
+    },
+    {
+      "id": "landsd_buildings",
+      "title": "Building (LandsD iB1000-derived building footprints with BaseHeight/TopHeight)",
+      "publisher": "Lands Department, HKSAR Government, via CSDI Portal",
+      "url": "https://portal.csdi.gov.hk/server/rest/services/common/landsd_rcd_1637211194312_35158/FeatureServer/0",
+      "catalogue": "https://data.gov.hk/en-data/dataset/hk-landsd-openmap-landsd-building",
+      "file": "landsd_buildings_kowloon.json",
+      "metadata_datestamp": "2026-09-22",
+      "license": "DATA.GOV.HK / CSDI Portal terms: free commercial and non-commercial reuse with attribution to the HKSAR Government, Lands Department and DATA.GOV.HK",
+      "attribution": "Building data © Lands Department, The Government of the Hong Kong SAR, via CSDI Portal / DATA.GOV.HK",
+      "limitations": "Live monthly-updated service queried by bounding box; the dated snapshot file and checksum pin the version used. Positional accuracy 0.015-1.5 m per metadata. Some records lack heights.",
+      "sha256": "7e22e8db705a39e8166e1d9eedd16cfea121633d40f7944bc0e9d7b0586c8767",
+      "feature_count": 40450,
+      "retrieved": "2026-10-04"
+    }
+  ]
+}
