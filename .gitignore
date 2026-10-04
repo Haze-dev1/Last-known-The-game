@@ -37,3 +37,8 @@ Thumbs.db
 
 # Keep game sources, export_presets.cfg, assets-source/, skills/,
 # docs/tracker/progress.json, and debug.log versioned.
+
+# Kowloon world: raw downloads and generated chunks are reproducible (see docs/world-map-pipeline.md)
+/assets-source/kowloon/raw/
+/game/world/data/
+/tools/world/.cache/
