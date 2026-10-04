@@ -23,6 +23,7 @@ from pathlib import Path
 import numpy as np
 import osmium
 import shapely
+import shapely.prepared
 from PIL import Image, ImageDraw
 from pyproj import Transformer
 from scipy import ndimage
@@ -55,7 +56,7 @@ BG_N = (806000, 832000)
 BG_STEP = 60
 
 # ---------------------------------------------------------------- materials / ids
-M_TERRAIN, M_ROAD, M_PAVING, M_FACADE, M_ROOF, M_RAIL, M_CONCRETE, M_PROP = range(8)
+M_TERRAIN, M_ROAD, M_PAVING, M_FACADE, M_ROOF, M_RAIL, M_CONCRETE, M_PROP, M_IVY = range(9)
 A_BANYAN, A_SLENDER, A_SHRUB, A_GRASS, A_LAMP, A_CAR, A_BUS, A_BLOB, A_FERN = range(9)
 
 ROAD_CLASSES = {
@@ -99,6 +100,13 @@ T_COLORS = {
     T_RAIL: ((0.35, 0.32, 0.29), 0.55),
     T_CEMETERY: ((0.33, 0.37, 0.24), 0.7),
     T_SLOPE: ((0.55, 0.53, 0.46), 0.35),
+}
+# terrain texture weights per class: (grass, forest floor, mud/scrub, wet); remainder = hard paving
+T_WEIGHTS = {
+    T_PAVED: (0.0, 0.0, 0.0, 0.0), T_PARK: (1.0, 0.0, 0.0, 0.0), T_WOOD: (0.0, 1.0, 0.0, 0.0),
+    T_SCRUB: (0.45, 0.0, 0.55, 0.0), T_SAND: (0.0, 0.0, 0.35, 0.0), T_WATER: (0.0, 0.0, 0.2, 0.8),
+    T_INDUSTRIAL: (0.0, 0.0, 0.0, 0.0), T_SEA: (0.0, 0.0, 0.6, 0.4), T_PITCH: (0.8, 0.0, 0.2, 0.0),
+    T_RAIL: (0.15, 0.0, 0.45, 0.0), T_CEMETERY: (0.75, 0.1, 0.15, 0.0), T_SLOPE: (0.0, 0.0, 0.0, 0.0),
 }
 LANDUSE_CLASS = [
     # (tag, values, class); later entries override earlier ones
@@ -514,10 +522,12 @@ def extrude_walls(ms, ring, bottom, top, mat, collide, c0, c1, ground_ref):
     P[:, 3] = np.column_stack([a[:, 0], np.full(m, top), a[:, 1]])
     N = np.repeat(np.column_stack([nx, np.zeros(m), nz])[:, None, :], 4, axis=1)
     U = np.zeros((m, 4, 2))
-    U[:, 0] = np.column_stack([s0, np.full(m, bottom - ground_ref)])
-    U[:, 1] = np.column_stack([s0 + L, np.full(m, bottom - ground_ref)])
-    U[:, 2] = np.column_stack([s0 + L, np.full(m, top - ground_ref)])
-    U[:, 3] = np.column_stack([s0, np.full(m, top - ground_ref)])
+    # u increases along cross(normal, up) for either ring orientation (consistent tangents)
+    u0, u1 = s0 * sign, (s0 + L) * sign
+    U[:, 0] = np.column_stack([u0, np.full(m, bottom - ground_ref)])
+    U[:, 1] = np.column_stack([u1, np.full(m, bottom - ground_ref)])
+    U[:, 2] = np.column_stack([u1, np.full(m, top - ground_ref)])
+    U[:, 3] = np.column_stack([u0, np.full(m, top - ground_ref)])
     base = np.arange(m) * 4
     idx = np.concatenate([np.column_stack([base, base + 1, base + 2]), np.column_stack([base, base + 2, base + 3])])
     ms.add(mat, collide, P.reshape(-1, 3), N.reshape(-1, 3), U.reshape(-1, 2), c0, c1, idx)
@@ -818,10 +828,10 @@ def main():
             for part in shapely.get_parts(clipped):
                 if part.geom_type != "LineString" or part.length < 0.5:
                     continue
-                build_linear(near, far, mm_near, boxes, terr, w, np.asarray(part.coords), i, j)
+                build_linear(near, far, mm_near, boxes, terr, w, np.asarray(part.coords), i, j, building_tree)
         # buildings
         for k in by_chunk.get((i, j), []):
-            build_building(near, far, boxes, buildings[k], major_tree, major_lines)
+            build_building(near, far, boxes, buildings[k], major_tree, major_lines, mm_near)
         totals["buildings"] += len(by_chunk.get((i, j), []))
         # vegetation and props
         place_vegetation(mm_near, mm_far, terr, cls, i, j, building_tree, road_poly_tree, osm_trees, boxes)
@@ -942,13 +952,11 @@ def build_terrain(ms, terr, cls, i, j, step, skirt):
     xs = i * CHUNK + np.arange(n) * step
     zs = j * CHUNK + np.arange(n) * step
     X, Z = np.meshgrid(xs, zs)
-    rgb = np.array([T_COLORS[c][0] for c in range(12)])
     veg = np.array([T_COLORS[c][1] for c in range(12)])
-    noise = (((X * 73856093) ^ (Z * 19349663)).astype(np.int64) % 1000) / 1000.0
-    col = rgb[C] * (0.9 + 0.2 * noise[..., None])
-    c0 = np.concatenate([np.clip(col * 255, 0, 255), np.clip(veg[C] * 255, 0, 255)[..., None]], axis=-1).astype(np.uint8)
+    weights = np.array([T_WEIGHTS[c] for c in range(12)])
+    c0 = np.clip(weights[C] * 255, 0, 255).astype(np.uint8)
     c1 = np.stack([C.astype(np.uint8), np.clip(S * 2.8, 0, 255).astype(np.uint8),
-                   np.zeros_like(C, np.uint8), np.full_like(C, 255, np.uint8)], axis=-1)
+                   np.clip(veg[C] * 255, 0, 255).astype(np.uint8), np.full_like(C, 255, np.uint8)], axis=-1)
     pos = np.stack([X, H, Z], axis=-1).reshape(-1, 3)
     uv = np.stack([X, Z], axis=-1).reshape(-1, 2)
     g = np.arange(n * n).reshape(n, n)
@@ -969,7 +977,7 @@ def build_terrain(ms, terr, cls, i, j, step, skirt):
                    np.concatenate([c1.reshape(-1, 4)[edge]] * 2), I)
 
 
-def build_linear(near, far, mm, boxes, terr, w, coords, ci, cj):
+def build_linear(near, far, mm, boxes, terr, w, coords, ci, cj, building_tree=None):
     t = w["tags"]
     is_rail = "highway" not in t
     width = _road_width(w)
@@ -1054,6 +1062,25 @@ def build_linear(near, far, mm, boxes, terr, w, coords, ci, cj):
             tilt = ((hh >> 8) % 100 - 50) / 50.0 * 0.07
             mm[A_LAMP].append((p[0], y, p[1], yaw, 1.0, (0.36, 0.37, 0.35, 1.0), tilt))
             boxes.append((p[0], y + 3.5, p[1], 0.12, 3.5, 0.12, 0.0))
+    # street trees in planters along both kerbs, decades overgrown
+    if code >= 4 and not w["bridge"] and building_tree is not None:
+        side = np.column_stack([-tan[:, 1], tan[:, 0]])
+        for k in range(2, len(pts), 5):
+            for sgn in (-1, 1):
+                hh = h32("st", w["id"], k, sgn)
+                if hh % 100 >= 42:
+                    continue
+                p = pts[k] + side[k] * sgn * (width / 2 + 2.6)
+                if len(building_tree.query(Point(p).buffer(2.5), predicate="intersects")):
+                    continue
+                y = float(terr.at(p[0], p[1]))
+                kind = A_BANYAN if (hh >> 8) % 100 < 55 else A_SLENDER
+                sc = 0.6 + ((hh >> 12) % 60) / 100.0
+                mm[kind].append((p[0], y - 0.1, p[1], (hh % 628) / 100.0, sc, (1.0, 1.0, 1.0, 1.0), 0.0))
+                boxes.append((p[0], y + 1.5, p[1], 0.35 * sc, 1.5, 0.35 * sc, 0.0))
+                for g in range(3):
+                    hg = h32("stg", w["id"], k, sgn, g)
+                    mm[A_GRASS].append((p[0] + ((hg % 100) - 50) / 40.0, y, p[1] + (((hg >> 8) % 100) - 50) / 40.0, (hg % 628) / 100.0, 0.8, (1.0, 1.0, 1.0, 1.0), 0.0))
     if code >= 3 and len(pts) > 3:
         spacing = 70.0
         for k in range(0, len(pts), max(1, int(spacing / 3.0))):
@@ -1095,11 +1122,16 @@ def _wall_strip(ms, edge, y0, y1, mat, collide):
 
 
 STYLE_TINTS = {
-    STYLE_RES: [(0.80, 0.77, 0.70), (0.76, 0.70, 0.66), (0.70, 0.73, 0.70), (0.72, 0.74, 0.76), (0.82, 0.80, 0.74), (0.74, 0.66, 0.60)],
-    STYLE_TONGLAU: [(0.62, 0.60, 0.55), (0.66, 0.58, 0.46), (0.55, 0.60, 0.55), (0.70, 0.66, 0.60), (0.58, 0.56, 0.58), (0.68, 0.55, 0.50)],
-    STYLE_INDUSTRIAL: [(0.66, 0.65, 0.60), (0.72, 0.70, 0.62), (0.58, 0.60, 0.60), (0.64, 0.62, 0.56)],
-    STYLE_PUBLIC: [(0.84, 0.82, 0.76), (0.80, 0.78, 0.70), (0.78, 0.80, 0.78), (0.82, 0.76, 0.70)],
-    STYLE_PODIUM: [(0.60, 0.59, 0.56), (0.66, 0.63, 0.57), (0.55, 0.55, 0.54)],
+    # mosaic-tile and painted towers: beige, salmon, mint, butter yellow, powder blue, grey
+    STYLE_RES: [(0.80, 0.74, 0.62), (0.82, 0.62, 0.54), (0.62, 0.76, 0.66), (0.84, 0.78, 0.52), (0.62, 0.70, 0.80),
+                (0.70, 0.70, 0.68), (0.78, 0.66, 0.70), (0.74, 0.62, 0.48)],
+    # tong lau: faded paint over render, ochre, green, rust, grey
+    STYLE_TONGLAU: [(0.66, 0.58, 0.44), (0.56, 0.64, 0.52), (0.70, 0.54, 0.44), (0.60, 0.60, 0.58), (0.72, 0.66, 0.50),
+                    (0.52, 0.60, 0.64), (0.70, 0.50, 0.50)],
+    STYLE_INDUSTRIAL: [(0.68, 0.66, 0.58), (0.74, 0.70, 0.56), (0.58, 0.62, 0.62), (0.66, 0.60, 0.52)],
+    # public estates: pastel bands
+    STYLE_PUBLIC: [(0.86, 0.80, 0.66), (0.70, 0.80, 0.74), (0.86, 0.70, 0.62), (0.72, 0.76, 0.86), (0.88, 0.84, 0.60)],
+    STYLE_PODIUM: [(0.60, 0.59, 0.56), (0.66, 0.63, 0.57), (0.55, 0.55, 0.54), (0.64, 0.56, 0.50)],
     STYLE_COMMERCIAL: [(0.40, 0.44, 0.47), (0.50, 0.50, 0.49), (0.36, 0.40, 0.42), (0.56, 0.54, 0.50)],
     STYLE_CANOPY: [(0.55, 0.55, 0.52)],
     STYLE_SHED: [(0.50, 0.48, 0.42), (0.45, 0.47, 0.46), (0.52, 0.42, 0.36)],
@@ -1107,7 +1139,7 @@ STYLE_TINTS = {
 SIGN_COLORS = [(150, 60, 52), (196, 186, 160), (170, 140, 70), (70, 90, 110), (150, 150, 140), (110, 50, 60), (60, 100, 80)]
 
 
-def build_building(near, far, boxes, b, major_tree, major_lines):
+def build_building(near, far, boxes, b, major_tree, major_lines, mm):
     g, style, seed = b["geom"], b["style"], b["seed"]
     bottom, top, ground = b["bottom"], b["top"], b["ground"]
     tints = STYLE_TINTS[style]
@@ -1151,12 +1183,14 @@ def build_building(near, far, boxes, b, major_tree, major_lines):
                 cx, cz = rp.x + ox, rp.y + oz
                 if p.contains(box(cx - sx, cz - sz, cx + sx, cz + sz)):
                     box_mesh(near, M_CONCRETE, True, (cx, top + sy, cz), (sx, sy, sz), 0.0, (int(tint[0] * 170), int(tint[1] * 168), int(tint[2] * 160), 255))
-        # hanging street signs on buildings facing major roads
+        # hanging street signs and concrete shop canopies on buildings facing major roads
         if style in (STYLE_TONGLAU, STYLE_RES, STYLE_COMMERCIAL, STYLE_PODIUM) and top - ground > 8:
-            add_signs(near, p, ground, top, seed, major_tree, major_lines)
+            add_signs(near, p, ground, top, seed, major_tree, major_lines, mm)
+        add_ivy(near, p, ground, top, seed, style)
+        add_roof_garden(mm, p, ground, top, seed, style)
 
 
-def add_signs(ms, p, ground, top, seed, major_tree, major_lines):
+def add_signs(ms, p, ground, top, seed, major_tree, major_lines, mm):
     ring = np.asarray(p.exterior.coords)
     area2 = np.sum(ring[:-1, 0] * ring[1:, 1] - ring[1:, 0] * ring[:-1, 1])
     sign = 1.0 if area2 > 0 else -1.0
@@ -1172,6 +1206,20 @@ def add_signs(ms, p, ground, top, seed, major_tree, major_lines):
         near_idx = major_tree.query(probe, predicate="dwithin", distance=6.0)
         if len(near_idx) == 0:
             continue
+        if style_canopy_ok(seed, k) and L > 4:
+            yaw_c = math.atan2(out[0], out[1])
+            depth_c = 1.6 + (h32("cn", seed, k) % 100) / 100.0
+            cc = mid + out * (depth_c / 2)
+            box_mesh(ms, M_CONCRETE, True, (cc[0], ground + 3.7, cc[1]), (L * 0.46, 0.14, depth_c / 2), yaw_c, (132, 128, 120, 255))
+            # weeds and ferns rooted in the debris on top of the canopy
+            for q in range(int(L // 3)):
+                hq = h32("cng", seed, k, q)
+                if hq % 3 == 0:
+                    continue
+                t = ((hq >> 4) % 100) / 100.0
+                pt = a + (b - a) * (0.06 + 0.88 * t) + out * (0.3 + ((hq >> 11) % 100) / 100.0 * (depth_c - 0.6))
+                kind = A_FERN if hq % 5 == 1 else A_GRASS
+                mm[kind].append((pt[0], ground + 3.84, pt[1], (hq % 628) / 100.0, 0.7 + ((hq >> 17) % 60) / 100.0, (1.0, 1.0, 1.0, 1.0), 0.0))
         n_signs = int(min(3, L // 7))
         for q in range(n_signs):
             hh = h32("sign", seed, k, q)
@@ -1197,10 +1245,10 @@ def add_signs(ms, p, ground, top, seed, major_tree, major_lines):
 
 VEG = {
     # class: (tree prob, shrub prob, grass prob)
-    T_PAVED: (0.005, 0.02, 0.10),
-    T_PARK: (0.09, 0.16, 0.45),
+    T_PAVED: (0.005, 0.035, 0.20),
+    T_PARK: (0.09, 0.18, 0.95),
     T_WOOD: (0.24, 0.22, 0.12),
-    T_SCRUB: (0.045, 0.38, 0.55),
+    T_SCRUB: (0.045, 0.40, 0.95),
     T_SAND: (0.0, 0.01, 0.06),
     T_WATER: (0.01, 0.10, 0.40),
     T_INDUSTRIAL: (0.008, 0.04, 0.12),
@@ -1251,6 +1299,7 @@ def place_vegetation(mm_near, mm_far, terr, cls, i, j, building_tree, road_poly_
     for k in np.flatnonzero(~blocked):
         x, z, y, a = float(xs[k]), float(zs[k]), float(ys[k]), int(ks[k])
         hh = h32("v", round(x, 1), round(z, 1))
+        c_here = int(cls[terr.index(x, z)])
         yaw = (hh % 628) / 100.0
         u = ((hh >> 10) % 1000) / 1000.0
         if a == A_BANYAN:
@@ -1270,6 +1319,8 @@ def place_vegetation(mm_near, mm_far, terr, cls, i, j, building_tree, road_poly_
             mm_near[a].append((x, y - 0.05, z, yaw, scale, (0.9 + 0.2 * u, 0.95, 0.85, 1.0), 0.0))
         else:
             scale = 0.6 + 0.7 * ((hh >> 20) % 100) / 100.0
+            if c_here in (T_PARK, T_SCRUB, T_CEMETERY, T_PITCH, T_WATER):
+                scale *= 1.7  # uncut meadow grass, knee to waist high
             mm_near[A_GRASS].append((x, y + (0.12 if on_road[k] else 0.0), z, yaw, scale, (0.95 + 0.15 * u, 0.95 + 0.1 * u, 0.8, 1.0), 0.0))
 
 
@@ -1405,6 +1456,80 @@ def district_stats(districts, buildings, roads):
         out[n] = {"buildings": nb, "road_km": round(km, 1), "area_km2": round(g.area / 1e6, 2)}
     return out
 
+
+
+
+def style_canopy_ok(seed, k):
+    return h32("canopy", seed, k) % 100 < 55
+
+
+IVY_CHANCE = {STYLE_TONGLAU: 38, STYLE_SHED: 55, STYLE_INDUSTRIAL: 30, STYLE_PODIUM: 34, STYLE_RES: 14,
+              STYLE_PUBLIC: 10, STYLE_COMMERCIAL: 6, STYLE_CANOPY: 0}
+
+
+def add_ivy(ms, p, ground, top, seed, style):
+    """Ivy/creeper curtains: hanging from parapets and climbing from wall bases on some walls."""
+    chance = IVY_CHANCE.get(style, 10)
+    if chance == 0:
+        return
+    ring = np.asarray(p.exterior.coords)
+    area2 = np.sum(ring[:-1, 0] * ring[1:, 1] - ring[1:, 0] * ring[:-1, 1])
+    sign = 1.0 if area2 > 0 else -1.0
+    height = top - ground
+    for k in range(len(ring) - 1):
+        a, b = ring[k], ring[k + 1]
+        L = float(np.hypot(*(b - a)))
+        hh = h32("ivy", seed, k)
+        if L < 2.5 or hh % 100 >= chance:
+            continue
+        d = (b - a) / L
+        out = np.array([d[1], -d[0]]) * sign
+        w = min(L, 2.5 + ((hh >> 7) % 100) / 100.0 * 9.0)
+        f0 = ((hh >> 14) % 100) / 100.0 * (L - w)
+        p0 = a + d * f0 + out * 0.12
+        p1 = p0 + d * w
+        hanging = (hh >> 21) % 3 != 0 or height < 6
+        if hanging:
+            length = min(height - 0.3, 3.0 + ((hh >> 23) % 100) / 100.0 * min(22.0, height))
+            y_top, y_bot = top + 0.5, top - length
+        else:
+            length = min(height - 0.5, 2.5 + ((hh >> 23) % 100) / 100.0 * 9.0)
+            y_top, y_bot = ground + length, ground - 0.3
+        P = np.array([[p0[0], y_bot, p0[1]], [p1[0], y_bot, p1[1]], [p1[0], y_top, p1[1]], [p0[0], y_top, p0[1]]])
+        n = np.array([out[0], 0.0, out[1]])
+        u0, u1 = f0 / 5.0, (f0 + w) / 5.0
+        span = (y_top - y_bot) / 10.0
+        if hanging:
+            U = np.array([[u0, span], [u1, span], [u1, 0.0], [u0, 0.0]])
+        else:  # climbing: dense part of the texture at the ground
+            U = np.array([[u0, 0.0], [u1, 0.0], [u1, span], [u0, span]])
+        ms.add(M_IVY, False, P, np.tile(n, (4, 1)), U, (255, 255, 255, 255), ((hh >> 9) % 256, 0, 0, 255),
+               np.array([[0, 1, 2], [0, 2, 3]]))
+
+
+def add_roof_garden(mm, p, ground, top, seed, style):
+    """Self-seeded growth on low and mid-rise roofs: grass, ferns, shrubs, the odd young tree."""
+    if style in (STYLE_CANOPY,) or top - ground > 45 or p.area < 25:
+        return
+    hh = h32("roofg", seed)
+    if hh % 100 >= (60 if style in (STYLE_TONGLAU, STYLE_SHED, STYLE_INDUSTRIAL, STYLE_PODIUM) else 30):
+        return
+    minx, minz, maxx, maxz = p.bounds
+    count = int(min(30, p.area / 18))
+    prepared = shapely.prepared.prep(p.buffer(-0.8))
+    for q in range(count * 2):
+        hq = h32("rg", seed, q)
+        x = minx + (hq % 10000) / 10000.0 * (maxx - minx)
+        z = minz + ((hq >> 13) % 10000) / 10000.0 * (maxz - minz)
+        if not prepared.contains(Point(x, z)):
+            continue
+        r = (hq >> 26) % 64
+        kind = A_SLENDER if r < 3 else (A_SHRUB if r < 18 else (A_FERN if r < 32 else A_GRASS))
+        scale = (0.45 + ((hq >> 3) % 40) / 100.0) if kind == A_SLENDER else 0.6 + ((hq >> 5) % 70) / 100.0
+        mm[kind].append((x, top, z, (hq % 628) / 100.0, scale, (1.0, 1.0, 1.0, 1.0), 0.0))
+        count -= 1
+        if count <= 0:
+            break
 
 if __name__ == "__main__":
     sys.exit(main())

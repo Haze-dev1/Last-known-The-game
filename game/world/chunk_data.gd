@@ -3,7 +3,7 @@ extends RefCounted
 ## Parses a generated chunk file (tools/world/build.py write_chunk) into meshes,
 ## multimeshes and collision data. Safe to call from a worker thread.
 
-const MAT_COUNT := 8
+const MAT_COUNT := 9
 
 var meshes: Array[ArrayMesh] = []
 var _mesh_specs: Array = []  # [arrays, material id] decoded off the main thread

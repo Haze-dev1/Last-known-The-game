@@ -78,6 +78,10 @@ func _run() -> void:
 	var landed := await wait_landed(30.0)
 	print("INFO: first landing after %d ms" % (Time.get_ticks_msec() - t_load))
 	check(landed, "initial spawn receives collision and walking is enabled")
+	if OS.get_cmdline_user_args().has("diag"):
+		await _diag()
+		quit(0)
+		return
 	if OS.get_cmdline_user_args().has("bench"):
 		await _bench()
 		print("WORLD CHECK: %d failures" % failures)
@@ -250,7 +254,7 @@ func _capture() -> void:
 		await frames(30)
 		var img := root.get_texture().get_image()
 		img.save_png("%s/%s.png" % [out_dir, s[0]])
-		print("INFO: captured %s at %s (fps %d)" % [s[0], str(world.viewer_position()), Engine.get_frames_per_second()])
+		print("INFO: captured %s at %s (fps %d) t=%d ms" % [s[0], str(world.viewer_position()), Engine.get_frames_per_second(), Time.get_ticks_msec()])
 	# walking-height frame timing in a dense street
 	world.set_flying(false)
 	world.jump_to(world._jump_named("Mong Kok"))
@@ -304,7 +308,26 @@ func _bench() -> void:
 	# Tiling window managers ignore window_set_size; fullscreen gives the monitor's native size.
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	await frames(30)
-	print("BENCH: window %s, renderer %s, adapter %s" % [str(DisplayServer.window_get_size()), RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
+	# render the 3D view at 1920x1080 regardless of the panel size (UI stays native)
+	var win := DisplayServer.window_get_size()
+	root.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	root.scaling_3d_scale = clampf(1920.0 / win.x, 0.25, 1.0)
+	await frames(10)
+	print("BENCH: window %s, 3D render %dx%d (scale %.3f), renderer %s, adapter %s" % [str(win), int(win.x * root.scaling_3d_scale), int(win.y * root.scaling_3d_scale), root.scaling_3d_scale, RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
+	for level in 3:
+		world.apply_quality(level)
+		world.jump_to(world._jump_named("Mong Kok"))
+		await wait_landed(20.0)
+		await wait_streamed()
+		var qt: Array[float] = []
+		for heading in 8:
+			world.player.rotation.y = heading * PI / 4.0
+			for f in 90:
+				var tq := Time.get_ticks_usec()
+				await process_frame
+				qt.append((Time.get_ticks_usec() - tq) / 1000.0)
+		_stats("quality %s, dense street Mong Kok 360 deg" % ["low", "medium", "high"][level], qt)
+	world.apply_quality(1)
 	world.jump_to(world._jump_named("Mong Kok"))
 	await wait_landed(20.0)
 	await wait_streamed()
@@ -349,3 +372,50 @@ func _bench() -> void:
 		await wait_streamed()
 		loads.append(Time.get_ticks_msec() - tj)
 		print("BENCH: jump %s: walkable after %d ms, surroundings streamed after %d ms" % [n, landed_ms, loads[-1]])
+
+
+func _ms(frames_n: int) -> float:
+	var t0 := Time.get_ticks_usec()
+	for f in frames_n:
+		await process_frame
+	return (Time.get_ticks_usec() - t0) / 1000.0 / frames_n
+
+
+## Frame-time attribution at a street: toggles one feature at a time.
+func _diag() -> void:
+	world.jump_to(world._jump_named("Mong Kok"))
+	await wait_landed(20.0)
+	await wait_streamed()
+	world.player.rotation.y = _open_heading()
+	await frames(20)
+	print("DIAG: baseline %.1f ms" % await _ms(30))
+	var env: Environment = world.environment
+	var multis := []
+	for n in world.chunk_root.get_children():
+		for c in n.get_children():
+			if c is MultiMeshInstance3D:
+				multis.append(c)
+	for m in multis: m.visible = false
+	print("DIAG: instances hidden %.1f ms" % await _ms(30))
+	for m in multis: m.visible = true
+	world.sun_light.shadow_enabled = false
+	print("DIAG: sun shadows off %.1f ms" % await _ms(30))
+	world.sun_light.shadow_enabled = true
+	env.volumetric_fog_enabled = false
+	print("DIAG: volumetric off %.1f ms" % await _ms(30))
+	env.ssr_enabled = false
+	env.ssao_enabled = false
+	env.ssil_enabled = false
+	print("DIAG: + ssr/ssao/ssil off %.1f ms" % await _ms(30))
+	var ivy: Material = world.assets.materials[8]
+	for n in world.chunk_root.get_children():
+		for c in n.get_children():
+			if c is MeshInstance3D and (c as MeshInstance3D).mesh.surface_get_material(0) == ivy:
+				c.visible = false
+	print("DIAG: + ivy hidden %.1f ms" % await _ms(30))
+	var facade: Material = world.assets.materials[3]
+	for n in world.chunk_root.get_children():
+		for c in n.get_children():
+			if c is MeshInstance3D and (c as MeshInstance3D).mesh.surface_get_material(0) == facade:
+				c.visible = false
+	print("DIAG: + facades hidden %.1f ms" % await _ms(30))

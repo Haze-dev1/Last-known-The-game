@@ -36,6 +36,9 @@ var pending := {}  # "n_i_j"/"f_i_j" -> task id
 var results := {}  # finished ChunkData waiting for the main thread
 var results_mutex := Mutex.new()
 var stream_timer := 0.0
+var environment: Environment
+var sun_light: DirectionalLight3D
+var quality := 1  # 0 low, 1 medium, 2 high
 var stats := {"loaded_near": 0, "loaded_far": 0, "bodies": 0, "unloads": 0, "missing": 0}
 
 
@@ -81,7 +84,7 @@ func _ready() -> void:
 func _bind_inputs() -> void:
 	var bindings := {"move_forward": KEY_W, "move_back": KEY_S, "move_left": KEY_A, "move_right": KEY_D,
 		"world_flight": KEY_F, "world_map": KEY_M, "world_recover": KEY_R, "world_next": KEY_BRACKETRIGHT,
-		"world_prev": KEY_BRACKETLEFT, "world_up": KEY_SPACE, "world_down": KEY_CTRL, "world_fast": KEY_SHIFT}
+		"world_prev": KEY_BRACKETLEFT, "world_up": KEY_SPACE, "world_down": KEY_CTRL, "world_fast": KEY_SHIFT, "world_quality": KEY_G}
 	for action in bindings:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -102,32 +105,106 @@ func _jump_named(n: String) -> int:
 func _build_environment() -> void:
 	var env := Environment.new()
 	var sky := Sky.new()
-	var sky_mat := ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = Color(0.46, 0.53, 0.58)
-	sky_mat.sky_horizon_color = Color(0.72, 0.74, 0.70)
-	sky_mat.ground_horizon_color = Color(0.55, 0.57, 0.53)
-	sky_mat.ground_bottom_color = Color(0.25, 0.27, 0.25)
-	sky_mat.sun_angle_max = 20.0
+	var sky_mat := PanoramaSkyMaterial.new()
+	sky_mat.panorama = assets.sky_texture
+	sky_mat.energy_multiplier = 1.15
 	sky.sky_material = sky_mat
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.9
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.ambient_light_energy = 1.0
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.tonemap_exposure = 0.95
+	env.ssao_enabled = true
+	env.ssao_radius = 1.6
+	env.ssao_intensity = 2.2
+	env.ssil_enabled = true
+	env.ssil_radius = 4.0
+	env.ssr_enabled = true
+	env.ssr_max_steps = 48
+	env.glow_enabled = true
+	env.glow_intensity = 0.35
+	env.glow_bloom = 0.04
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.66, 0.69, 0.66)
-	env.fog_density = 0.00009  # humid haze; geography stays legible for kilometres
-	env.fog_aerial_perspective = 0.2
+	env.fog_light_color = Color(0.70, 0.73, 0.71)
+	env.fog_density = 0.00007
+	env.fog_aerial_perspective = 0.25
+	env.fog_sky_affect = 0.35
+	# humid haze close to the ground; gives light shafts between towers
+	env.volumetric_fog_enabled = true
+	env.volumetric_fog_density = 0.0016
+	env.volumetric_fog_albedo = Color(0.82, 0.85, 0.82)
+	env.volumetric_fog_anisotropy = 0.35
+	env.volumetric_fog_length = 160.0
+	env.volumetric_fog_sky_affect = 0.0
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.0
+	env.adjustment_contrast = 1.1
+	environment = env
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-38, -32, 0)
-	sun.light_energy = 1.1
-	sun.light_color = Color(1.0, 0.95, 0.86)
+	sun.basis = Basis.looking_at(-_sky_sun_direction(assets.sky_texture), Vector3.UP)
+	sun.light_energy = 1.6
+	sun.light_color = Color(1.0, 0.94, 0.84)
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 140.0
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance = 260.0
+	sun.shadow_blur = 1.5
+	sun.light_volumetric_fog_energy = 1.4
 	add_child(sun)
+	sun_light = sun
+	get_viewport().mesh_lod_threshold = 2.0
+	var q := quality
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("quality="):
+			q = ["low", "medium", "high"].find(arg.substr(8))
+	apply_quality(maxi(q, 0))
+
+
+## Direction toward the brightest point of the equirectangular sky (the sun), using Godot's
+## panorama mapping u = atan2(x, z) / 2pi, v = acos(y) / pi.
+func _sky_sun_direction(sky_tex: Texture2D) -> Vector3:
+	var img := sky_tex.get_image()
+	if img == null:
+		return Vector3(0.5, 0.6, 0.6).normalized()
+	if img.is_compressed():
+		img.decompress()
+	img.resize(256, 128, Image.INTERPOLATE_BILINEAR)
+	var best := Vector2i(0, 0)
+	var best_l := -1.0
+	for y in 64:
+		for x in 256:
+			var c := img.get_pixel(x, y)
+			var l := c.r + c.g + c.b
+			if l > best_l:
+				best_l = l
+				best = Vector2i(x, y)
+	var phi := (best.x + 0.5) / 256.0 * TAU
+	var theta := (best.y + 0.5) / 128.0 * PI
+	var dir := Vector3(sin(theta) * sin(phi), cos(theta), sin(theta) * cos(phi)).normalized()
+	print("Sky sun direction %s (elevation %.0f deg)" % [str(dir), rad_to_deg(asin(dir.y))])
+	return dir
+
+
+## Graphics presets. Low keeps SSAO and shadows; Medium adds reflections, volumetric haze and TAA;
+## High adds screen-space indirect light and longer shadows.
+func apply_quality(level: int) -> void:
+	quality = level
+	var env := environment
+	env.ssao_enabled = true
+	env.ssao_radius = 1.6
+	env.ssil_enabled = level >= 2
+	env.ssr_enabled = level >= 1
+	env.volumetric_fog_enabled = level >= 1
+	env.fog_density = 0.00005 if level >= 1 else 0.00008
+	env.glow_enabled = level >= 1
+	sun_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if level >= 1 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	sun_light.directional_shadow_max_distance = [140.0, 200.0, 260.0][level]
+	get_viewport().use_taa = level >= 1
+	get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if level == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
 	var water := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(60000, 60000)
@@ -214,6 +291,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	elif event.is_action_pressed("world_flight"):
 		set_flying(not flying)
+	elif event.is_action_pressed("world_quality"):
+		apply_quality((quality + 1) % 3)
+		show_notice("Graphics: " + ["Low", "Medium", "High"][quality])
 	elif event.is_action_pressed("world_recover"):
 		recover("Recovered to the nearest safe street")
 	elif event.is_action_pressed("world_next"):
@@ -400,9 +480,9 @@ func _walk_guards() -> void:
 func _update_hud() -> void:
 	var p := viewer_position()
 	var mode := "DEVELOPER FLIGHT (inspection tool, Shift fast, Space/Ctrl up/down)" if flying else ("Waiting for ground…" if awaiting_ground else "Walking")
-	hud.text = "%s\n%s · x %.0f  y %.1f  z %.0f\nFPS %d · chunks near %d / far %d · collision %d · static mem %.0f MiB\nM map · F flight · R recover · [ ] district jumps · Esc pause" % [
+	hud.text = "%s\n%s · x %.0f  y %.1f  z %.0f\nFPS %d · chunks near %d / far %d · collision %d · static mem %.0f MiB\nM map · F flight · R recover · [ ] district jumps · G graphics (%s) · Esc pause" % [
 		mode, district_at(p), p.x, p.y, p.z, Engine.get_frames_per_second(), stats["loaded_near"], stats["loaded_far"],
-		stats["bodies"], Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0]
+		stats["bodies"], Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, ["Low", "Medium", "High"][quality]]
 
 
 # ------------------------------------------------------------------ streaming

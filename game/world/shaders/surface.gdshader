@@ -1,69 +1,102 @@
 shader_type spatial;
-// Roads, paving, rail ballast, roofs, structural concrete and props share this shader.
+// Roads, paving, roofs, rail, structural concrete and props.
 // kind: 1 road, 2 paving, 4 roof, 5 rail, 6 concrete, 7 vertex-coloured prop.
 #include "res://world/shaders/noise.gdshaderinc"
 
 uniform int kind = 1;
+uniform sampler2D albedo_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D normal_a : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D albedo_b : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D normal_b : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float scale_a = 4.0;
+uniform float scale_b = 3.0;
+
 varying vec4 c0;
-varying vec4 c1;
 varying vec3 wpos;
+varying vec3 wnrm;
 
 void vertex() {
 	c0 = COLOR;
-	c1 = vec4(mod(UV2.x, 256.0), mod(UV2.y, 256.0), floor(UV2.x / 256.0), floor(UV2.y / 256.0)) / 255.0;
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	wnrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	vec3 t = abs(NORMAL.y) > 0.7 ? vec3(1.0, 0.0, 0.0) : normalize(cross(NORMAL, vec3(0.0, 1.0, 0.0)));
+	TANGENT = t;
+	BINORMAL = normalize(cross(NORMAL, t));
+}
+
+// world-space planar UV chosen by the dominant normal axis (cheap triplanar)
+vec2 planar(vec3 p, vec3 n) {
+	vec3 a = abs(n);
+	if (a.y > a.x && a.y > a.z) return p.xz;
+	if (a.x > a.z) return vec2(p.z, -p.y);
+	return vec2(p.x, -p.y);
 }
 
 void fragment() {
 	vec2 p = wpos.xz;
 	float n = fbm(p * 0.12);
-	float fine = vnoise(p * 3.0);
 	vec3 col;
-	float rough = 0.92;
+	vec3 nm = vec3(0.5, 0.5, 1.0);
+	float rough = 0.9;
+	float metal = 0.0;
 	if (kind == 1) {
 		float code = floor(c0.r * 255.0 / 20.0 + 0.5);
 		float lanes = floor(c0.g * 255.0 / 30.0 + 0.5);
 		float width = c0.b * 25.5;
-		col = vec3(0.21, 0.21, 0.205) * (0.85 + 0.3 * fine) + 0.06 * n;
-		float u = UV.x;
-		float v = UV.y;
+		vec2 ruv = vec2(UV.x, UV.y) / scale_a;
+		col = texture(albedo_a, ruv).rgb * (0.85 + 0.25 * fbm(p * 0.05));
+		col = mix(col, vec3(dot(col, vec3(0.33))), 0.45) * 0.9;
+		nm = texture(normal_a, ruv).rgb;
 		float paint = 0.0;
-		if (lanes >= 2.0 && code >= 4.0) {
-			paint = max(paint, step(abs(u), 0.08) * step(0.5, fract(v / 9.0)));
-		}
-		if (code >= 5.0) {
-			paint = max(paint, step(abs(abs(u) - (width * 0.5 - 0.35)), 0.07));
-		}
-		paint *= smoothstep(0.25, 0.6, vnoise(p * 0.8)); // worn paint
-		col = mix(col, vec3(0.62, 0.58, 0.44), paint * 0.75);
-		float crack = smoothstep(0.025, 0.0, abs(fbm(p * 0.28 + 3.0) - 0.5));
-		float edge = smoothstep(width * 0.5 - 1.2, width * 0.5, abs(u));
-		float growth = clamp(crack * 0.8 + edge * smoothstep(0.45, 0.75, n), 0.0, 1.0);
-		col = mix(col, vec3(0.20, 0.26, 0.12), growth * 0.75);
-		col = mix(col, vec3(0.26, 0.22, 0.16), smoothstep(0.6, 0.85, n) * 0.35); // leaf litter
+		if (lanes >= 2.0 && code >= 4.0) paint = max(paint, step(abs(UV.x), 0.08) * step(0.5, fract(UV.y / 9.0)));
+		if (code >= 5.0) paint = max(paint, step(abs(abs(UV.x) - (width * 0.5 - 0.35)), 0.07));
+		paint *= smoothstep(0.3, 0.65, vnoise(p * 0.8));
+		col = mix(col, vec3(0.62, 0.60, 0.50), paint * 0.45);
+		// overgrown shoulders and moss along cracks
+		float edge = smoothstep(width * 0.5 - 1.4, width * 0.5, abs(UV.x));
+		float growth = clamp(edge * smoothstep(0.35, 0.7, n) + smoothstep(0.7, 0.9, n) * 0.5, 0.0, 1.0);
+		vec3 moss = texture(albedo_b, p / scale_b).rgb;
+		col = mix(col, moss, growth * 0.8);
+		nm = mix(nm, texture(normal_b, p / scale_b).rgb, growth);
+		col = mix(col, vec3(0.24, 0.20, 0.14), smoothstep(0.62, 0.85, n) * 0.35); // leaf litter
+		rough = mix(0.85, 0.95, growth);
 	} else if (kind == 2) {
-		vec2 g = abs(fract(p / 0.6) - 0.5);
-		float joint = smoothstep(0.43, 0.5, max(g.x, g.y));
-		col = mix(vec3(0.50, 0.46, 0.42), vec3(0.47, 0.40, 0.36), hash21(floor(p / 0.6)));
-		col *= 0.88 + 0.2 * fine;
-		col = mix(col, vec3(0.19, 0.25, 0.12), joint * smoothstep(0.35, 0.7, n));
-		col = mix(col, vec3(0.24, 0.30, 0.15), smoothstep(0.7, 0.9, n) * 0.6);
+		vec3 a = texture(albedo_a, p / scale_a).rgb;
+		vec3 b = texture(albedo_b, p / scale_b).rgb;
+		float m = smoothstep(0.4, 0.7, n);
+		col = mix(a, b, m);
+		nm = mix(texture(normal_a, p / scale_a).rgb, texture(normal_b, p / scale_b).rgb, m);
 	} else if (kind == 4) {
-		col = c0.rgb * (0.9 + 0.2 * fine);
-		col = mix(col, vec3(0.20, 0.24, 0.15), smoothstep(0.55, 0.85, n) * 0.5); // rooftop moss and puddles
-		col = mix(col, vec3(0.12, 0.13, 0.12), smoothstep(0.75, 0.9, fbm(p * 0.4)) * 0.4);
+		vec3 a = texture(albedo_a, p / scale_a).rgb;
+		vec3 b = texture(albedo_b, p / scale_b).rgb;
+		float m = smoothstep(0.45, 0.75, n + 0.15 * fbm(p * 0.6));
+		col = mix(a * (0.7 + c0.rgb * 0.5), b, m);
+		nm = mix(texture(normal_a, p / scale_a).rgb, texture(normal_b, p / scale_b).rgb, m);
+		col = mix(col, col * 0.45, smoothstep(0.78, 0.92, fbm(p * 0.4)) * 0.6); // standing water stains
 	} else if (kind == 5) {
-		col = mix(vec3(0.33, 0.30, 0.27), vec3(0.25, 0.22, 0.20), vnoise(p * 7.0));
-		col = mix(col, vec3(0.22, 0.28, 0.13), smoothstep(0.5, 0.8, n) * 0.7);
-	} else if (kind == 6) {
-		col = c0.rgb * (0.88 + 0.22 * fine);
-		col *= 1.0 - 0.3 * smoothstep(0.5, 0.85, fbm(vec2(p.x + p.y, wpos.y * 0.3)));
+		col = texture(albedo_a, p / scale_a).rgb;
+		nm = texture(normal_a, p / scale_a).rgb;
+		float m = smoothstep(0.5, 0.8, n);
+		col = mix(col, texture(albedo_b, p / scale_b).rgb, m * 0.7);
 	} else {
-		col = c0.rgb * (0.85 + 0.2 * fine);
-		col *= 1.0 - 0.25 * smoothstep(0.55, 0.85, n);
-		rough = 0.75;
+		vec2 tuv = planar(wpos, wnrm);
+		vec3 a = texture(albedo_a, tuv / scale_a).rgb;
+		nm = texture(normal_a, tuv / scale_a).rgb;
+		if (kind == 6) {
+			col = mix(a, c0.rgb * (0.6 + a), 0.35);
+			col *= 1.0 - 0.3 * smoothstep(0.5, 0.85, fbm(vec2(p.x + p.y, wpos.y * 0.3)));
+			float moss = smoothstep(0.6, 0.85, fbm(tuv * 0.2)) * step(0.5, wnrm.y + 0.6);
+			col = mix(col, texture(albedo_b, tuv / scale_b).rgb, moss * 0.7);
+		} else {
+			vec3 rust = texture(albedo_b, tuv / scale_b).rgb;
+			col = mix(c0.rgb * 0.9, rust, smoothstep(0.35, 0.8, fbm(tuv * 0.7)) * 0.75);
+			metal = 0.35;
+			rough = 0.7;
+		}
 	}
 	ALBEDO = col;
+	NORMAL_MAP = nm;
 	ROUGHNESS = rough;
-	SPECULAR = 0.25;
+	METALLIC = metal;
+	SPECULAR = 0.35;
 }

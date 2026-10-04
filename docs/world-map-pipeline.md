@@ -188,3 +188,33 @@ Visual acceptance of the art direction is **pending user review**. Observed weak
 - OSM road widths, sidewalks and land use are volunteer data and vary in completeness. Separately mapped sidewalks can overlap generated ones.
 - Vegetation species are archetypes, not a botanical survey. The overgrowth amount is a design choice for "decades of abandonment", not a modelled ecology.
 - Chapter 1 POIs have not been relocated into the world; the chapter remains its own scene.
+
+
+## Graphics pass (Forward+, CC0 assets), 4 October 2026
+
+Requested by the user: make the world look current-generation rather than placeholder, while staying light.
+
+- **Renderer:** the project now uses **Forward+ (Vulkan)**. The Compatibility results above are kept for comparison. Chapter 1 foundation and chapter checks pass with 0 failures under Forward+, headless and graphical.
+- **Assets:** 64 CC0 files, all from Poly Haven and ambientCG.
+  - Tooling: `tools/assets/fetch_assets.py` downloads them and records sha256 values in `assets-source/third_party/manifest.json`. `tools/assets/make_textures.py` produces `game/world/textures/`. Both outputs are ignored by Git and reproducible.
+  - Surfaces (1k PBR textures): plaster, mosaic tiles, painted concrete, mossy plaster, rusted shutters, damaged asphalt, overgrown pavers, moss, forest floor, grass, mud, gravel, worn roof concrete, rusty metal and camphor bark.
+  - Sky: a partly cloudy HDRI. The sun direction is taken from the HDRI's brightest pixel.
+  - Foliage cards: composited deterministically from ambientCG single-leaf atlases into banyan and pioneer canopies, a hanging ivy curtain, ferns and grass.
+- **Facades:** each building keeps its own paint colour on photo-texture grain, with normal maps. Windows are interior-mapped (a parallax room behind the glass) with frames, glass reflection and broken panes. Ground floors get rusted shutters. Weathering includes AC units, rain streaks, black-mould runs under sills, roofline runoff, damp mossy bases and large-scale grime. The tile and paint palette is based on Kowloon housing colours.
+- **Overgrowth geometry:** ivy curtains hang from parapets and climb from wall bases on about 6–55% of walls depending on building type. Low and mid-rise roofs carry self-seeded gardens. Concrete shop canopies have weeds on top. Street trees grow in kerb planters. Parks and scrub have knee-to-waist-high meadow grass, and weeds grow in road cracks. Trees are bark trunks with leaf-card crowns; banyans have aerial roots. Foliage sways in the wind and is translucent in backlight.
+- **Lighting:** AgX tonemapping, SSAO, SSR on water, volumetric haze, 4-split sun shadows and TAA.
+- **Graphics presets:** G cycles Low, Medium (default) and High; `-- quality=low|medium|high` sets one from the command line. Presets were measured in the dense Mong Kok street with 3D rendered at 1920×1200 (11% more pixels than 1080p), exported settings, Arc iGPU:
+
+| Preset | Mean frame time | FPS | p99 |
+| --- | --- | --- | --- |
+| Low | 11.0 ms | 91 | 14.6 ms |
+| Medium | 15.4 ms | 65 | 18.3 ms |
+| High | 18.3 ms | 55 | 21.1 ms |
+
+  Walking on Medium: 15.5 ms (65 FPS).
+- **Package:** native exported start verified, peak RSS 666 MiB. The `.pck` is 355.0 MB.
+- **Caveat:** under Wayland, a hidden or covered game window is throttled to about 1 FPS. Benchmarks and captures need the window visible.
+
+![Mong Kok aerial](images/world/fplus_mong_kok_aerial.jpg)
+![Sham Shui Po street](images/world/fplus_sham_shui_po_street.jpg)
+![Kowloon City](images/world/fplus_kowloon_city_park.jpg)

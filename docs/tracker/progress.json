@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-04T06:14:45.762827+00:00",
+  "updated_at": "2026-10-04T07:52:52.900809+00:00",
   "project": "Last Known",
   "phase": "whole-world-exploration",
   "current_chapter": 1,
@@ -215,6 +215,18 @@
         "1080p 116-126 FPS mean, peak RSS <=509 MiB on Core Ultra 7 155H / Arc."
       ],
       "next_action": "Re-measure after art pass; add low/high settings."
+    },
+    {
+      "id": "kowloon-graphics-pass",
+      "title": "Forward+ graphics and overgrowth pass with CC0 assets",
+      "status": "in_progress",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T07:52:52.900809+00:00",
+      "evidence": [
+        "Forward+ with PBR CC0 textures, interior-mapped windows, ivy/roof gardens/street trees; world/chapter/foundation checks 0 failures; validate 0 failures.",
+        "Medium preset 65 FPS at 1920x1200 internal (Mong Kok), peak RSS 666 MiB native export."
+      ],
+      "next_action": "User visual review; then roof shapes/balconies geometry and POI detail."
     }
   ],
   "blockers": [],
