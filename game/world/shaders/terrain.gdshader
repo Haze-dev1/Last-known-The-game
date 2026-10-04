@@ -1,6 +1,19 @@
 shader_type spatial;
-// Ground: land-use colour from the pipeline (COLOR.rgb), overgrowth amount (COLOR.a).
+// Ground: COLOR = texture weights (grass, forest floor, mud/scrub, wet); remainder = hard paving.
+// UV2-packed: class id, slope*2.8, overgrowth amount.
 #include "res://world/shaders/noise.gdshaderinc"
+
+uniform sampler2D grass_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D grass_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D forest_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D forest_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D mud_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D mud_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D pavers_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D pavers_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D concrete_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D concrete_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D wet_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 
 varying vec4 c0;
 varying vec4 c1;
@@ -10,31 +23,38 @@ void vertex() {
 	c0 = COLOR;
 	c1 = vec4(mod(UV2.x, 256.0), mod(UV2.y, 256.0), floor(UV2.x / 256.0), floor(UV2.y / 256.0)) / 255.0;
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	TANGENT = vec3(1.0, 0.0, 0.0);
+	BINORMAL = vec3(0.0, 0.0, 1.0);
 }
 
 void fragment() {
 	vec2 p = wpos.xz;
-	float cls = floor(c1.r * 255.0 + 0.5);
-	float n1 = fbm(p * 0.09);
-	float n2 = vnoise(p * 0.7);
-	vec3 base = c0.rgb * (0.86 + 0.28 * n2);
-	float veg = c0.a;
-	// patches of growth: clustered, never a uniform carpet
-	float growth = smoothstep(0.62 - veg * 0.5, 0.95 - veg * 0.3, n1 + 0.15 * n2);
-	vec3 green = mix(vec3(0.20, 0.27, 0.12), vec3(0.33, 0.37, 0.17), vnoise(p * 0.23));
-	vec3 col = mix(base, green, growth * clamp(veg + 0.15, 0.0, 1.0));
-	if (cls < 0.5 || abs(cls - 6.0) < 0.5 || abs(cls - 11.0) < 0.5) {
-		// paved / industrial / shotcrete: slab joints and cracks with moss
-		vec2 g = abs(fract(p / vec2(2.4, 2.4)) - 0.5);
-		float joint = smoothstep(0.47, 0.5, max(g.x, g.y));
-		float crack = smoothstep(0.02, 0.0, abs(fbm(p * 0.35) - 0.5));
-		col = mix(col, vec3(0.18, 0.22, 0.13), (joint * 0.35 + crack * 0.6) * clamp(veg * 2.0, 0.2, 1.0));
-		col *= 0.93 + 0.1 * vnoise(p * 2.1);
-	}
-	if (abs(cls - 5.0) < 0.5) {
-		col = mix(col, vec3(0.10, 0.15, 0.13), 0.55);
-	}
+	vec2 uv = p / 3.0;
+	// break visible tiling with a slowly rotated second sample
+	vec2 uv2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / 4.3;
+	float macro = fbm(p * 0.03);
+	float n = fbm(p * 0.12);
+	vec4 w = c0;
+	float slope = c1.g * 255.0 / 2.8;
+	float veg = c1.b;
+	// patchy growth creeps into hard ground
+	float creep = smoothstep(0.55 - veg * 0.4, 0.85, n + 0.2 * macro) * clamp(veg + 0.1, 0.0, 1.0);
+	w.x = max(w.x, creep * (1.0 - w.y) * 0.9);
+	float hard = clamp(1.0 - (w.x + w.y + w.z + w.w), 0.0, 1.0);
+	vec3 g = mix(texture(grass_albedo, uv).rgb, texture(grass_albedo, uv2).rgb, 0.5) * vec3(0.82, 1.05, 0.70);
+	vec3 f = mix(texture(forest_albedo, uv).rgb, texture(forest_albedo, uv2).rgb, 0.5);
+	vec3 m = texture(mud_albedo, uv).rgb;
+	bool steep = slope > 33.0;
+	vec3 h = steep ? texture(concrete_albedo, uv * 0.7).rgb * vec3(0.95, 0.93, 0.85) : texture(pavers_albedo, uv * 0.8).rgb;
+	vec3 wt = texture(wet_albedo, uv).rgb * 0.55;
+	vec3 col = g * w.x + f * w.y + m * w.z + wt * w.w + h * hard;
+	col /= max(w.x + w.y + w.z + w.w + hard, 1e-3);
+	col *= 0.85 + 0.3 * macro;
+	vec3 nm = texture(grass_normal, uv).rgb * w.x + texture(forest_normal, uv).rgb * w.y + texture(mud_normal, uv).rgb * w.z
+		+ (steep ? texture(concrete_normal, uv * 0.7).rgb : texture(pavers_normal, uv * 0.8).rgb) * hard + vec3(0.5, 0.5, 1.0) * w.w;
+	nm /= max(w.x + w.y + w.z + w.w + hard, 1e-3);
 	ALBEDO = col;
-	ROUGHNESS = 0.95;
-	SPECULAR = 0.2;
+	NORMAL_MAP = nm;
+	ROUGHNESS = mix(0.95, 0.35, w.w);
+	SPECULAR = 0.3;
 }

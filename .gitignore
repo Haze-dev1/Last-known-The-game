@@ -42,3 +42,6 @@ Thumbs.db
 /assets-source/kowloon/raw/
 /game/world/data/
 /tools/world/.cache/
+/assets-source/third_party/polyhaven/
+/assets-source/third_party/ambientcg/
+/game/world/textures/
