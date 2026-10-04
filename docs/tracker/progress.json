@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-04T04:39:55.476507+00:00",
+  "updated_at": "2026-10-04T06:14:45.762827+00:00",
   "project": "Last Known",
-  "phase": "chapter-1-placeholder",
+  "phase": "whole-world-exploration",
   "current_chapter": 1,
   "tasks": [
     {
@@ -146,14 +146,75 @@
     {
       "id": "whole-kowloon-map",
       "title": "Build whole Kowloon exterior world before detailed POIs",
-      "status": "pending",
+      "status": "completed",
       "owner": "Claude",
-      "updated_at": "2026-10-04T04:34:25.966103+00:00",
+      "updated_at": "2026-10-04T06:14:45.762827+00:00",
       "evidence": [
         "User prioritizes whole map independent of chapter geography; handoff at docs/prompts/03-whole-kowloon-map.md.",
-        "HTTPS fetch with existing gh credential helper succeeded; handoff branch codex/whole-map-handoff based on merged main."
+        "HTTPS fetch with existing gh credential helper succeeded; handoff branch codex/whole-map-handoff based on merged main.",
+        "Branch claude/whole-kowloon-map from 8127fa3 (contains PR #2 merge 7b08540).",
+        "Coverage: OSM relation 10268797 (five Kowloon districts incl. New Kowloon to ridge); 47.33 km2 land, 933 chunks, uncovered land 0 m2; 28,101 LandsD buildings (26,123 surveyed heights, 1,978 storeys/inferred).",
+        "tools/world validate.py 0 failures: 1,744 seams identical, scale 11,875 m extent equals source, roads within 14.5 m of chunk; two builds byte-identical (1,870 files).",
+        "world_check.gd 0 failures headless+graphical, source and exported pack: 63 jumps/5 districts, memory 100->98 MiB on revisit lap, walking/seam/boundary/recovery/flight.",
+        "Fullscreen 1920x1080 Compatibility, Arc iGPU, exported pack: 116-126 FPS mean, p99 <=27 ms; peak RSS 481-509 MiB; jumps walkable in 75-160 ms.",
+        "Export: 73.5 MB executable + 276.6 MB pck; native start verified. Chapter 1 foundation/chapter checks 0 failures headless+graphical."
       ],
-      "next_action": "Claude fetches codex/whole-map-handoff over HTTPS, reads prompt, and creates its map implementation branch."
+      "next_action": "User reviews screenshots/plays builds/linux/last_known_world.x86_64, decides building-snapshot archive (Git LFS or release asset), then relocate Chapter 1 POIs to a real Sham Shui Po site and begin the detailed POI pass."
+    },
+    {
+      "id": "whole-kowloon-map-sources",
+      "title": "Pinned sources, manifest, coordinate verification",
+      "status": "completed",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T06:14:45.762827+00:00",
+      "evidence": [
+        "assets-source/kowloon/sources.json with sha256; DTM vs 30 OSM peaks within ~3 m."
+      ],
+      "next_action": "Archive 39 MB LandsD building snapshot outside Git (decision pending)."
+    },
+    {
+      "id": "whole-kowloon-map-pipeline",
+      "title": "Deterministic offline pipeline fetch/build/validate",
+      "status": "completed",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T06:14:45.762827+00:00",
+      "evidence": [
+        "validate.py 0 failures; byte-identical rebuild."
+      ],
+      "next_action": "Extend validation when POI edits are added."
+    },
+    {
+      "id": "whole-kowloon-map-runtime",
+      "title": "Streaming world, walking, developer flight, jumps, overview, recovery",
+      "status": "completed",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T06:14:45.762827+00:00",
+      "evidence": [
+        "world_check.gd 0 failures incl. exported pack."
+      ],
+      "next_action": "Human playtest of controls and feel."
+    },
+    {
+      "id": "whole-kowloon-map-visual",
+      "title": "Exterior presentation and overgrowth pass",
+      "status": "in_progress",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T06:14:45.762827+00:00",
+      "evidence": [
+        "10 inspected screenshots in docs/images/world; layout matches sources."
+      ],
+      "next_action": "User visual acceptance; art pass for roofs, parks, ground-level growth."
+    },
+    {
+      "id": "whole-kowloon-map-performance",
+      "title": "Benchmark representative routes",
+      "status": "completed",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T06:14:45.762827+00:00",
+      "evidence": [
+        "1080p 116-126 FPS mean, peak RSS <=509 MiB on Core Ultra 7 155H / Arc."
+      ],
+      "next_action": "Re-measure after art pass; add low/high settings."
     }
   ],
   "blockers": [],
@@ -225,5 +286,5 @@
       "details": "Human exported fresh playthrough and checkpoint resume, native focus, Quit/restart, atmosphere, clue comprehension and preferred window sizes. Art/performance pass not done; release remains pending."
     }
   ],
-  "next_action": "Claude builds shared whole-Kowloon exterior world using docs/prompts/03-whole-kowloon-map.md."
+  "next_action": "User reviews Kowloon world build and screenshots; decide building-snapshot archive; then relocate Chapter 1 POIs into the world."
 }

@@ -6,6 +6,8 @@ Godot with typed GDScript; native Linux first. Kowloon is the geographic referen
 
 Godot 4.7.2 is verified installed and is the initial engine baseline. Compatibility is the verified foundation renderer. Chapter 1 investigation and checkpoints are implemented in placeholder geometry; narrative remains provisional. See [project structure](project-structure.md) for file placement and toolchain status. The Sunday 4 October 2026, 7–8 PM IST target is an attempt to deliver a playable chapter, not a commitment to complete the entire game.
 
+**Shared-world decision (4 October 2026):** the user prioritised the whole Kowloon world before detailed POIs. This supersedes "complete one chapter before expanding the city". A streamed whole-Kowloon exterior world exists; see [world map pipeline](world-map-pipeline.md). Chapters are narrative progression within it. Chapter 1 remains a separate placeholder scene and regression test until its POIs move into the world.
+
 ## Milestones in order
 
 1. **Define Chapter 1.** Write its opening, objective, clue chain, puzzle prerequisites, ending, and essential props. Suggested footprint: street, repair shop, apartment, utility room. Finish with a real discovery and a lead into Chapter 2. Keep unresolved full-story choices provisional.
@@ -18,7 +20,7 @@ Godot 4.7.2 is verified installed and is the initial engine baseline. Compatibil
 
 ## Proposed budgets
 
-Aim for 60 FPS at 1080p low settings on the current laptop, under 2 GB game RAM, and a packaged first chapter under 500 MB. These are provisional targets, not measured results. Adjust scene complexity based on a representative benchmark. Hardware observed earlier: Core Ultra 7 155H, approximately 32 GB RAM, Intel Arc integrated graphics.
+Aim for 60 FPS at 1080p low settings on the current laptop and under 2 GB game RAM. The 500 MB packaged-chapter figure was a chapter budget, not a whole-world budget. Whole-world source, generated and packaged sizes are reported separately in the [pipeline document](world-map-pipeline.md). These are targets; measured results live with their hardware notes. Adjust scene complexity based on a representative benchmark. Hardware observed earlier: Core Ultra 7 155H, approximately 32 GB RAM, Intel Arc integrated graphics.
 
 ## Work ownership
 
@@ -32,4 +34,4 @@ See [the shared skill library](../skills/README.md). Use scope discipline during
 
 ## Immediate next step
 
-The [proposed Chapter 1 brief](source/chapter_01.md) and exported street/shop foundation are available; see [setup and verification](setup.md). Chapter 1 now includes the apartment, utility room, corroborating records, onward lead, ending and checkpoints. Next, human-playtest the exported investigation, then benchmark one representative art/audio scene. A full-city generator, comprehensive survival simulation, and additional chapters remain outside this milestone.
+The [proposed Chapter 1 brief](source/chapter_01.md) and exported street/shop foundation are available; see [setup and verification](setup.md). Chapter 1 now includes the apartment, utility room, corroborating records, onward lead, ending and checkpoints. Next, human-playtest the exported investigation, then benchmark one representative art/audio scene. The whole-Kowloon world is in place for exploration. Next: relocate Chapter 1 POIs to a real Sham Shui Po site inside it, then detail POIs. A survival simulation and additional chapters remain later work.

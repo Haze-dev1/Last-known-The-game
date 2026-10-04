@@ -95,6 +95,10 @@ In restricted agent environments, Godot may report `Error attempting to create d
 - Artifact: `builds/linux/last_known.x86_64`, **73,550,976 bytes** (about 70.14 MiB), embedded PCK. Binaries, caches and downloaded templates stay ignored.
 - Chapter 1 is implemented in placeholders; release readiness, finished art, human clue comprehension, native focus switching and Windows/macOS validation remain pending.
 
+## Kowloon world
+
+The whole-Kowloon exploration world has its own entry point and export preset (**Linux Kowloon World** → `builds/linux/last_known_world.x86_64` + `.pck`). It needs generated data first. Build, run and check commands, controls and results are in [the world map pipeline](world-map-pipeline.md). The Chapter 1 preset and checks above are unchanged.
+
 ## Pending human checklist
 
 1. Start a new expedition in the exported executable and reach the ending using the complete route above; try the optional letter and an alternate clue order.

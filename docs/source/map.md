@@ -1,12 +1,14 @@
 # Realistic city map brief
 
-The map should feel like a functioning city that was abandoned and changed over decades. This is a design brief, not a researched reconstruction of a selected city. No geographic data has been imported yet.
+The map should feel like a functioning city that was abandoned and changed over decades.
+
+**Decision (4 October 2026): the game uses one shared, geographically grounded Kowloon world.** It covers the five Kowloon districts (Kowloon plus New Kowloon to the Kowloon ridge) and is built from LandsD terrain and building surveys and OpenStreetMap. Chapters are narrative progression inside this world, not geographic limits. The pipeline, sources, coverage polygon and limitations are in [the world map pipeline](../world-map-pipeline.md). The guidance below still applies to how places are adapted for play.
 
 ## Direction
 
 Use a real city or a coherent portion of one as the geographic reference. Preserve the relationships that make it believable: terrain, water, road hierarchy, rail corridors, neighbourhood patterns, building access, and infrastructure.
 
-Kowloon is the selected geographic reference. The user prefers a believable adaptation rather than complete fidelity. Preserve plausible connections and travel distances while adapting selected streets and interiors for gameplay. Sham Shui Po is the proposed starting neighbourhood, not yet a fixed playable boundary.
+Kowloon is the selected geographic reference. The user prefers a believable adaptation rather than complete fidelity. Preserve plausible connections and travel distances while adapting selected streets and interiors for gameplay. Sham Shui Po is the proposed starting neighbourhood inside the whole-Kowloon world.
 
 ## Select geography before landmarks
 
@@ -14,7 +16,7 @@ The reference city should support a dense urban core, residential areas, transpo
 
 Do not select a city only because it has a recognizable skyline. Check its street-level character, ordinary buildings, service access, drainage, and neighbourhood transitions. Cultural identity then informs names, signage, interiors, and the siblings' lives.
 
-Map scale and the exact playable boundary remain undecided; the city reference is Kowloon, Hong Kong.
+Scale is real metric scale. The playable exterior boundary is the documented Kowloon coverage polygon; interiors and access changes remain per-location design work.
 
 ## Preserve urban logic
 
@@ -70,4 +72,4 @@ Define distances only after testing traversal time. A physically large map is no
 
 After choosing a candidate city, inspect authoritative maps, terrain and flood information, urban plans, architectural references, and local vegetation evidence. Potential base-map sources include OpenStreetMap and municipal open-data portals; availability, accuracy, licensing, and attribution must be checked before use.
 
-The next map artifact should show a selected reference area, terrain and water, principal roads, rail, district boundaries, provisional POIs, and approximate walking distances. It should distinguish source geography from fictional changes. No city-specific realism claim is verified by this brief alone.
+The streamed world now provides terrain and water, roads, rail, district boundaries, building masses and an overview map. The next map step is placing the provisional POIs at real candidate sites and measuring walking routes between them. Fictional changes (blocked streets, access, damage) must be recorded separately from source geography.

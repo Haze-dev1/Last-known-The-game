@@ -5,6 +5,7 @@ A first-person survival mystery set in an abandoned urban area reclaimed by natu
 This workspace contains design documents and a runnable placeholder Chapter 1 with investigation and checkpoints. The title is provisional.
 
 - [Run and verify Chapter 1](setup.md)
+- [Kowloon world map pipeline](world-map-pipeline.md): sources, build, streaming world, checks and results
 - [Proposed Chapter 1 brief](source/chapter_01.md)
 
 ## Design documents
@@ -21,4 +22,4 @@ This workspace contains design documents and a runnable placeholder Chapter 1 wi
 
 The city has been reclaimed through ordinary growth over decades. Its layout should feel like a real urban place. The experience stays first-person, without showing the protagonist's face, present-day human NPCs, or spoken dialogue. The tone is lonely, melancholic, and eerie rather than horror.
 
-Kowloon is the selected geographic reference, adapted for gameplay. Godot with typed GDScript and native Linux delivery are selected. Character names, exact map boundaries, and the final story remain open. The earlier names have been removed. User flow, UI theme, detailed POIs, and controls follow story refinement; these documents do not finalize those systems.
+Kowloon is the selected geographic reference, adapted for gameplay. Godot with typed GDScript and native Linux delivery are selected. The whole-Kowloon exterior world (five Kowloon districts) is the shared game world; chapters are progression inside it. Character names, detailed POI placement and the final story remain open. The earlier names have been removed. User flow, UI theme, detailed POIs, and controls follow story refinement; these documents do not finalize those systems.
