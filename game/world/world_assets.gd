@@ -35,7 +35,8 @@ func _init() -> void:
 	var prop := _surface(7, "painted_concrete", "rusty_metal_02", 2.0, 1.5)
 	var ivy := _foliage("ivy_curtain", 0.4, 0.3, 4.0)
 	# 0 terrain, 1 road, 2 paving, 3 facade, 4 roof, 5 rail, 6 concrete, 7 prop, 8 ivy
-	materials = [terrain, road, paving, facade, roof, rail, concrete, prop, ivy]
+	# 9 = building detail (balconies, parapets) sharing the concrete look, culled at 200 m
+	materials = [terrain, road, paving, facade, roof, rail, concrete, prop, ivy, concrete]
 	water_material = ShaderMaterial.new()
 	water_material.shader = load("res://world/shaders/water.gdshader")
 	sky_texture = load(TEX + "sky_partly_cloudy.hdr")

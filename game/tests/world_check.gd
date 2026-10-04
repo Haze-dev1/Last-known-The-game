@@ -310,10 +310,10 @@ func _bench() -> void:
 	await frames(30)
 	# render the 3D view at 1920x1080 regardless of the panel size (UI stays native)
 	var win := DisplayServer.window_get_size()
-	root.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
-	root.scaling_3d_scale = clampf(1920.0 / win.x, 0.25, 1.0)
+	world.render_scale = clampf(1920.0 / win.x, 0.25, 1.0)
+	world.apply_quality(world.quality)
 	await frames(10)
-	print("BENCH: window %s, 3D render %dx%d (scale %.3f), renderer %s, adapter %s" % [str(win), int(win.x * root.scaling_3d_scale), int(win.y * root.scaling_3d_scale), root.scaling_3d_scale, RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
+	print("BENCH: window %s, 3D render %dx%d (scale %.3f), renderer %s, adapter %s" % [str(win), int(win.x * world.render_scale), int(win.y * world.render_scale), world.render_scale, RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	for level in 3:
 		world.apply_quality(level)
 		world.jump_to(world._jump_named("Mong Kok"))

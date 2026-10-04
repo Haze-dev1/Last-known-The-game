@@ -3,9 +3,10 @@ extends RefCounted
 ## Parses a generated chunk file (tools/world/build.py write_chunk) into meshes,
 ## multimeshes and collision data. Safe to call from a worker thread.
 
-const MAT_COUNT := 9
+const MAT_COUNT := 10
 
 var meshes: Array[ArrayMesh] = []
+var mesh_mats: PackedInt32Array = []
 var _mesh_specs: Array = []  # [arrays, material id] decoded off the main thread
 var _mm_specs: Array = []  # [asset, count, buffer]
 var collide_faces: Array[PackedVector3Array] = []
@@ -87,6 +88,7 @@ func build_resources(materials: Array[Material], instance_meshes: Array[Mesh]) -
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, spec[0])
 		mesh.surface_set_material(0, materials[mini(spec[1], MAT_COUNT - 1)])
 		meshes.append(mesh)
+		mesh_mats.append(spec[1])
 	for spec in _mm_specs:
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D

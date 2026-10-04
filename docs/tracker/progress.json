@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-04T07:52:52.900809+00:00",
+  "updated_at": "2026-10-04T08:52:56.014091+00:00",
   "project": "Last Known",
   "phase": "whole-world-exploration",
   "current_chapter": 1,
@@ -227,6 +227,18 @@
         "Medium preset 65 FPS at 1920x1200 internal (Mong Kok), peak RSS 666 MiB native export."
       ],
       "next_action": "User visual review; then roof shapes/balconies geometry and POI detail."
+    },
+    {
+      "id": "kowloon-detail-pass",
+      "title": "Balconies, rooflines, heavier overgrowth, decayed roads",
+      "status": "in_progress",
+      "owner": "Claude",
+      "updated_at": "2026-10-04T08:52:56.014091+00:00",
+      "evidence": [
+        "Checks 0 failures (world/foundation/chapter/validate).",
+        "1920x1200 internal: Low 76 / Medium 56 / High 51 FPS; pck 560 MB; RSS 894 MiB."
+      ],
+      "next_action": "User visual review; optional: bring Medium back to 60 FPS (SSR/volumetric tuning or LOD for balconies)."
     }
   ],
   "blockers": [],

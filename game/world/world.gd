@@ -7,7 +7,7 @@ const DATA_DIR := "res://world/data/"
 const PlayerScript := preload("res://player/player.gd")
 const OverviewMap := preload("res://world/overview_map.gd")
 
-@export var near_radius := 480.0
+@export var near_radius := 400.0
 @export var far_radius := 3400.0
 @export var collision_radius := 200.0
 @export var max_parallel_loads := 4
@@ -39,6 +39,7 @@ var stream_timer := 0.0
 var environment: Environment
 var sun_light: DirectionalLight3D
 var quality := 1  # 0 low, 1 medium, 2 high
+var render_scale := 1.0  # base 3D scale; benchmarks set it to render at 1080p-class sizes
 var stats := {"loaded_near": 0, "loaded_far": 0, "bodies": 0, "unloads": 0, "missing": 0}
 
 
@@ -201,9 +202,13 @@ func apply_quality(level: int) -> void:
 	env.volumetric_fog_enabled = level >= 1
 	env.fog_density = 0.00005 if level >= 1 else 0.00008
 	env.glow_enabled = level >= 1
-	sun_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if level >= 1 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-	sun_light.directional_shadow_max_distance = [140.0, 200.0, 260.0][level]
-	get_viewport().use_taa = level >= 1
+	sun_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if level >= 2 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	sun_light.directional_shadow_max_distance = [120.0, 150.0, 260.0][level]
+	# FSR2 was measured slower here (geometry-bound iGPU), so render natively with TAA/FXAA.
+	var vp := get_viewport()
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	vp.scaling_3d_scale = render_scale
+	vp.use_taa = level >= 1
 	get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if level == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
 	var water := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
@@ -607,11 +612,15 @@ func _apply_results(budget: int) -> void:
 
 func _instantiate(data: ChunkData, near: bool) -> Node3D:
 	var root := Node3D.new()
-	for mesh in data.meshes:
+	for k in data.meshes.size():
 		var mi := MeshInstance3D.new()
-		mi.mesh = mesh
-		if not near:
+		mi.mesh = data.meshes[k]
+		var mat := data.mesh_mats[k]
+		if not near or mat >= 7 or mat == 1 or mat == 2 or mat == 5:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if near and mat >= 7:
+			mi.visibility_range_end = 200.0 if mat == 9 else 220.0  # balconies, railings, signs, ivy
+			mi.visibility_range_end_margin = 20.0
 		root.add_child(mi)
 	for mm in data.multimeshes:
 		var mmi := MultiMeshInstance3D.new()
